@@ -1352,7 +1352,7 @@ function renderCommand(data) {
       <div class="card-body">
         <div class="command-block">
           <div class="command-text" onclick="toggleBreakdown('${breakdownId}', this)">
-            ${escapeHtml(data.command)}
+            ${colorizeCommand(data.command)}
             <span class="clickable-hint">← click to explain</span>
           </div>
           <div class="command-block-footer">
@@ -1375,7 +1375,7 @@ function renderCommand(data) {
 
         <div class="example-block">
           <div class="example-label">Real Example</div>
-          <div class="example-command">${escapeHtml(data.example.command)}</div>
+          <div class="example-command">${colorizeCommand(data.example.command)}</div>
           <div class="example-context">${escapeHtml(data.example.context)}</div>
         </div>
 
@@ -1406,7 +1406,7 @@ function renderWorkflow(data) {
             <div class="step-header">
               <span class="step-title">${escapeHtml(step.title)}</span>
               <div class="step-command-group">
-                <code class="step-command-preview" onclick="toggleStepExpand('${expandId}', event)">${escapeHtml(step.command)}</code>
+                <code class="step-command-preview" onclick="toggleStepExpand('${expandId}', event)">${colorizeCommand(step.command)}</code>
                 <button class="step-copy-full" onclick="copyCommand(this, '${escapeJs(step.command)}')">⊕ copy</button>
               </div>
             </div>
