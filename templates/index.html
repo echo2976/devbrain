@@ -1103,6 +1103,81 @@
     color: var(--green);
   }
 
+  /* ── CLAUDE CODE TIPS ── */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    padding: 4px 2px;
+  }
+
+  .tip-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    animation: fadeUp 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tip-card:hover {
+    border-color: var(--border2);
+  }
+
+  .tip-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tip-category {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--bg3);
+    color: var(--text-muted);
+    border: 1px solid var(--border2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .tip-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .tip-body {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .tip-command {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  .tip-command-text {
+    flex: 1;
+    word-break: break-all;
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -1154,6 +1229,9 @@
     <div class="sidebar-label">Reference</div>
     <button class="tool-btn" id="cheatsheet-nav-btn" onclick="showCheatSheets(this)">
       <span class="tool-icon">≡</span> Cheat Sheets
+    </button>
+    <button class="tool-btn" id="claudecode-nav-btn" onclick="showClaudeCodeTips(this)">
+      <span class="tool-icon">✦</span> Claude Code Tips
     </button>
   </div>
 
@@ -1888,6 +1966,168 @@ function renderCheatSheetCard(sheet) {
 
 function toggleCsOutput(id) {
   document.getElementById(id).classList.toggle('open');
+}
+
+// ── CLAUDE CODE TIPS DATA ──
+const CLAUDE_CODE_TIPS = [
+  {
+    category: "Setup",
+    title: "Install Claude Code",
+    body: "Install globally via npm. Requires Node.js 18+.",
+    command: "npm install -g @anthropic-ai/claude-code"
+  },
+  {
+    category: "Setup",
+    title: "Create a CLAUDE.md file",
+    body: "Put a CLAUDE.md file in your project root. Claude reads it automatically every session. Use it for project conventions, tech stack, what not to touch, and coding preferences. Think of it as onboarding docs for your AI teammate.",
+    link: { url: "https://github.com/forrestchang/andrej-karpathy-skills", label: "Karpathy skills Claude.md file" }
+  },
+  {
+    category: "Setup",
+    title: "Skip permission prompts",
+    body: "By default Claude asks permission for every file edit and command. Use this flag to skip the interruptions. Only use it once you trust what Claude is doing in your codebase.",
+    command: "claude --dangerously-skip-permissions"
+  },
+  {
+    category: "Setup",
+    title: "Create a shortcut alias",
+    body: "Add this to your ~/.zshrc so you can launch with skip-permissions in one keystroke. Run source ~/.zshrc after adding it.",
+    command: "alias cc='claude --dangerously-skip-permissions'"
+  },
+  {
+    category: "Workflow",
+    title: "Always start in plan mode",
+    body: "Press Shift+Tab to cycle into plan mode before coding. Ask Claude to explore the problem first. The more time spent planning, the better the output. Think of Claude as an eager engineer you need to guide — not a vending machine."
+  },
+  {
+    category: "Workflow",
+    title: "Use /clear between tasks",
+    body: "Long sessions accumulate context that slows Claude down and wastes tokens. Run /clear every time you start something new. Clean context = faster, more accurate responses."
+  },
+  {
+    category: "Workflow",
+    title: "Resume a previous session",
+    body: "Continue your most recent conversation, or open a picker to choose a specific session.",
+    command: "claude --continue"
+  },
+  {
+    category: "Workflow",
+    title: "Press Esc to stop without losing context",
+    body: "Esc stops Claude mid-action immediately. You can redirect or correct without losing the conversation. Double-press Esc (or /rewind) to open a checkpoint menu and restore code, conversation, or both."
+  },
+  {
+    category: "Workflow",
+    title: "Run terminal commands inline",
+    body: "Prefix any command with ! to run it immediately and put the output into Claude's context. Faster than asking Claude to run it.",
+    command: "!git status"
+  },
+  {
+    category: "Prompting",
+    title: "Give Claude a feedback loop",
+    body: "Include test commands or expected outputs in your prompt. Claude runs the tests, sees failures, and fixes them without you stepping in. Boris Cherny (Claude Code's creator) says this gives a 2-3x quality improvement."
+  },
+  {
+    category: "Prompting",
+    title: "Use negative constraints",
+    body: "Tell Claude what NOT to do. 'Don't use external libraries', 'Don't modify the database schema', 'Don't break existing tests.' Constraints prevent costly mistakes and keep Claude focused."
+  },
+  {
+    category: "Prompting",
+    title: "Show a pattern, then ask to follow it",
+    body: "Paste an example of how something is done in your project, then say 'follow the same pattern.' Claude picks up your conventions and produces consistent code."
+  },
+  {
+    category: "Prompting",
+    title: "Use 'think' for hard problems",
+    body: "Adding 'think' to your prompt triggers extended reasoning on Opus. Use it for architecture decisions, tricky debugging, or multi-step problems. Don't waste it on simple tasks like renaming a variable."
+  },
+  {
+    category: "Context",
+    title: "@ tag files for precision",
+    body: "Use @filename to include a specific file in your prompt context. More precise than letting Claude search — you control exactly what it sees."
+  },
+  {
+    category: "Context",
+    title: "Use skills for reusable knowledge",
+    body: "Skills are markdown files in .claude/skills/ that load only when relevant. Unlike CLAUDE.md which loads every session, skills keep context lean. Use them for API conventions, deployment steps, or specialized domain knowledge."
+  },
+  {
+    category: "Git",
+    title: "Auto-review pull requests",
+    body: "Run /install-github-app to have Claude automatically review your PRs. Customize the review prompt in claude-code-review.yml to focus on bugs and security issues only — the default is too verbose."
+  },
+  {
+    category: "Git",
+    title: "Have Claude address PR comments",
+    body: "Paste PR review comments into Claude and ask it to address them. Claude can also pull comments directly from a GitHub pull request and work through them systematically."
+  }
+];
+
+// ── CLAUDE CODE TIPS DISPLAY ──
+function showClaudeCodeTips(btn) {
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelector('.search-area').style.display = 'none';
+
+  // Group tips by category
+  const grouped = {};
+  CLAUDE_CODE_TIPS.forEach(tip => {
+    if (!grouped[tip.category]) grouped[tip.category] = [];
+    grouped[tip.category].push(tip);
+  });
+
+  const sectionsHtml = Object.entries(grouped).map(([category, tips]) => `
+    <div style="margin-bottom: 28px;">
+      <div style="
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--green);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--border);
+      ">${escapeHtml(category)}</div>
+      <div class="tips-grid">
+        ${tips.map(tip => `
+          <div class="tip-card">
+            <div class="tip-title">${escapeHtml(tip.title)}</div>
+            <div class="tip-body">${escapeHtml(tip.body)}</div>
+            ${tip.link ? `
+              <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">I highly recommend using this:</div>
+              <a href="${escapeHtml(tip.link.url)}" target="_blank" style="
+                font-family: var(--mono);
+                font-size: 11px;
+                color: var(--blue);
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                margin-top: 2px;
+              ">↗ ${escapeHtml(tip.link.label)}</a>
+            ` : ''}
+            ${tip.command ? `
+              <div class="tip-command">
+                <span class="tip-command-text">${colorizeCommand(tip.command)}</span>
+                <button class="cs-copy-btn" onclick="copyCommand(this, '${escapeJs(tip.command)}')">copy</button>
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div style="padding: 28px;">
+      <div style="margin-bottom: 24px;">
+        <div style="font-size:18px; font-weight:500; color:var(--text); margin-bottom:4px;">Claude Code Tips</div>
+        <div style="font-size:13px; color:var(--text-muted); font-family:var(--mono);">${CLAUDE_CODE_TIPS.length} tips from Anthropic docs and the community</div>
+      </div>
+      ${sectionsHtml}
+    </div>
+  `;
 }
 
 // ── INIT ──
