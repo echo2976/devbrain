@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevBrain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0b;
+    --bg2: #0f1210;
+    --bg3: #161a16;
+    --border: #2a332c;
+    --border2: #344038;
+    --green: #a3f7b5;
+    --green-dim: #86efac;
+    --green-muted: #2d6b47;
+    --green-glow: rgba(163, 247, 181, 0.10);
+    --text: #f0f5f1;
+    --text-dim: #c0d4c5;
+    --text-muted: #7a9880;
+    --yellow: #fde68a;
+    --red: #fca5a5;
+    --blue: #93c5fd;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+  }
+
+  .logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-text {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span {
+    color: var(--text-dim);
+    font-weight: 300;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-section {
+    padding: 16px 12px 8px;
+  }
+
+  .sidebar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 6px;
+  }
+
+  .tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    background: none;
+    width: 100%;
+    text-align: left;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: var(--sans);
+  }
+
+  .tool-btn:hover {
+    background: var(--bg3);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .tool-btn.active {
+    background: var(--green-glow);
+    color: var(--green);
+    border-color: var(--green-muted);
+  }
+
+  .tool-icon {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    width: 20px;
+    text-align: center;
+  }
+
+  .tool-btn.active .tool-icon {
+    color: var(--green-dim);
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 12px;
+  }
+
+  .sidebar-section.workflows {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .workflow-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .workflow-item:hover {
+    background: var(--bg3);
+    color: var(--text-dim);
+  }
+
+  .workflow-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-area {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .search-prefix {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--green);
+    padding: 12px 0 12px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    line-height: 1;
+  }
+
+  #search-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-left: none;
+    border-right: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 12px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search-input::placeholder {
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+
+  #search-input:focus {
+    border-color: var(--green-muted);
+  }
+
+  #search-input:focus + .search-suffix,
+  #search-input:focus ~ .search-prefix {
+    border-color: var(--green-muted);
+  }
+
+  .search-suffix {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-btn {
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    border-radius: 5px;
+    padding: 5px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .search-btn:hover {
+    background: var(--green-dim);
+  }
+
+  .search-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-family: var(--mono);
+    display: flex;
+    gap: 20px;
+  }
+
+  .hint-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .hint-tag span {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  /* ── CLARIFICATION POP-UP ── */
+  .clarify-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .clarify-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .clarify-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 24px;
+    width: 360px;
+    transform: translateY(8px);
+    transition: transform 0.2s;
+  }
+
+  .clarify-overlay.visible .clarify-box {
+    transform: translateY(0);
+  }
+
+  .clarify-question {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    font-family: var(--mono);
+  }
+
+  .clarify-query {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+
+  .clarify-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .clarify-opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg3);
+  }
+
+  .clarify-opt:hover {
+    border-color: var(--green-muted);
+    background: var(--green-glow);
+    color: var(--green);
+  }
+
+  .clarify-opt-icon {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--text-muted);
+    width: 24px;
+    text-align: center;
+  }
+
+  .clarify-opt:hover .clarify-opt-icon {
+    color: var(--green);
+  }
+
+  .clarify-opt-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    opacity: 0.6;
+  }
+
+  .empty-terminal {
+    font-family: var(--mono);
+    font-size: 48px;
+    color: var(--green);
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-size: 18px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .empty-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    line-height: 1.8;
+  }
+
+  /* ── LOADING ── */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    gap: 16px;
+  }
+
+  .loading-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .loading-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.2s infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  .loading-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── RESPONSE CARDS ── */
+  .response-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 800px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+
+  .card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-tool-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--green-muted);
+    color: var(--green);
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .card-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fresh-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: rgba(251, 191, 36, 0.1);
+    color: var(--yellow);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .type-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* Command card body */
+  .card-body {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Command block */
+  .command-block {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .command-block-footer {
+    display: flex;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    color: var(--green);
+    border-color: var(--green-muted);
+  }
+
+  .copy-btn.copied {
+    color: var(--green);
+    border-color: var(--green-muted);
+  }
+
+  .command-text {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--green);
+    padding: 14px 16px;
+    word-break: break-all;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .command-text:hover {
+    background: var(--green-glow);
+  }
+
+  .command-text .clickable-hint {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .command-block:hover .clickable-hint {
+    opacity: 1;
+  }
+
+  /* Breakdown */
+  .breakdown-section {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .breakdown-section.open {
+    display: flex;
+  }
+
+  .breakdown-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  .breakdown-row:last-child {
+    border-bottom: none;
+  }
+
+  .breakdown-row:hover {
+    background: var(--bg3);
+  }
+
+  .breakdown-part {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    padding: 10px 14px;
+    min-width: 160px;
+    border-right: 1px solid var(--border);
+    word-break: break-all;
+  }
+
+  .breakdown-explanation {
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 10px 14px;
+    line-height: 1.5;
+  }
+
+  .breakdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.15s;
+    background: none;
+    border: none;
+    margin-left: 2px;
+  }
+
+  .breakdown-toggle:hover {
+    color: var(--green);
+  }
+
+  .toggle-arrow {
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .breakdown-toggle.open .toggle-arrow {
+    transform: rotate(90deg);
+  }
+
+  /* Example */
+  .example-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .example-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .example-command {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--blue);
+    padding: 10px 14px;
+  }
+
+  .example-context {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 14px 10px;
+    line-height: 1.5;
+  }
+
+  /* Warning */
+  .warning-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(248, 113, 113, 0.05);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .warning-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .warning-text {
+    font-size: 13px;
+    color: var(--red);
+    line-height: 1.5;
+  }
+
+  /* ── WORKFLOW CARD ── */
+  .workflow-description {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .step-item {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .step-item:last-child {
+    border-bottom: none;
+  }
+
+  .step-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+  }
+
+  .step-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+  }
+
+  .step-check:hover {
+    border-color: var(--green-dim);
+  }
+
+  .step-check.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .step-check.checked::after {
+    content: '✓';
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .step-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .step-item.completed .step-title {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  .step-command-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .step-command-preview {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--green);
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .step-command-preview:hover {
+    border-color: var(--green-muted);
+    color: var(--green-dim);
+  }
+
+  .step-explanation {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  .step-expand {
+    border-top: 1px solid var(--border);
+    padding: 12px 16px 12px 48px;
+    background: var(--bg);
+    display: none;
+  }
+
+  .step-expand.open {
+    display: block;
+  }
+
+  .step-expand-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .step-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .step-breakdown .breakdown-row {
+    background: var(--bg2);
+  }
+
+  .step-copy-full {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .step-copy-full:hover {
+    color: var(--green);
+    border-color: var(--green-muted);
+  }
+
+  .step-warning {
+    margin-top: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(248, 113, 113, 0.05);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--red);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">Dev<span>Brain</span></div>
+    <div class="logo-sub">// developer tools reference</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Tools</div>
+    <button class="tool-btn active" data-tool="all" onclick="selectTool(this, 'all')">
+      <span class="tool-icon">⬡</span> All Tools
+    </button>
+    <button class="tool-btn" data-tool="git" onclick="selectTool(this, 'git')">
+      <span class="tool-icon">⎇</span> Git
+    </button>
+    <button class="tool-btn" data-tool="docker" onclick="selectTool(this, 'docker')">
+      <span class="tool-icon">⬡</span> Docker
+    </button>
+    <button class="tool-btn" data-tool="vscode" onclick="selectTool(this, 'vscode')">
+      <span class="tool-icon">❮❯</span> VS Code / Cursor
+    </button>
+    <button class="tool-btn" data-tool="terminal" onclick="selectTool(this, 'terminal')">
+      <span class="tool-icon">$</span> Terminal
+    </button>
+    <button class="tool-btn" data-tool="python" onclick="selectTool(this, 'python')">
+      <span class="tool-icon">🐍</span> Python
+    </button>
+    <button class="tool-btn" data-tool="node" onclick="selectTool(this, 'node')">
+      <span class="tool-icon">⬡</span> Node / npm
+    </button>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section workflows">
+    <div class="sidebar-label">Workflows</div>
+    <div id="workflow-list"></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="search-area">
+    <div class="search-wrap">
+      <span class="search-prefix">›</span>
+      <input type="text" id="search-input"
+        placeholder="What are you trying to do? (e.g. undo my last commit)"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="search-suffix">
+        <button class="search-btn" onclick="submitQuery()">ask</button>
+      </div>
+    </div>
+    <div class="search-hint">
+      <span class="hint-tag"><span>Enter</span> to search</span>
+      <span class="hint-tag"><span>↑↓</span> history</span>
+      <span class="hint-tag">click any command to expand</span>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-terminal">&gt;_</div>
+      <div class="empty-title">Ask anything about your dev tools</div>
+      <div class="empty-sub">
+        "how do I undo a commit"<br>
+        "set up a new Python project"<br>
+        "what does docker-compose up do"
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- CLARIFICATION OVERLAY -->
+<div class="clarify-overlay" id="clarify-overlay">
+  <div class="clarify-box">
+    <div class="clarify-question">What are you looking for?</div>
+    <div class="clarify-query" id="clarify-query-text"></div>
+    <div class="clarify-options" id="clarify-options"></div>
+  </div>
+</div>
+
+<script>
+let currentTool = 'all';
+let pendingQuery = '';
+let queryHistory = [];
+let historyIndex = -1;
+
+// ── TOOL SELECTION ──
+function selectTool(btn, tool) {
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTool = tool;
+  loadWorkflows(tool);
+}
+
+// ── WORKFLOW SIDEBAR ──
+async function loadWorkflows(tool) {
+  const res = await fetch('/api/workflows');
+  const data = await res.json();
+  const list = document.getElementById('workflow-list');
+  list.innerHTML = '';
+
+  const toolsToShow = tool === 'all' ? Object.keys(data) : [tool];
+  
+  toolsToShow.forEach(t => {
+    if (!data[t]) return;
+    if (tool === 'all') {
+      const label = document.createElement('div');
+      label.className = 'sidebar-label';
+      label.style.marginTop = '10px';
+      label.textContent = t.toUpperCase();
+      list.appendChild(label);
+    }
+    data[t].forEach(wf => {
+      const item = document.createElement('div');
+      item.className = 'workflow-item';
+      item.innerHTML = `<span class="workflow-dot"></span>${wf}`;
+      item.onclick = () => {
+        document.getElementById('search-input').value = wf;
+        submitQuery();
+      };
+      list.appendChild(item);
+    });
+  });
+}
+
+// ── SEARCH ──
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitQuery();
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex < queryHistory.length - 1) {
+      historyIndex++;
+      document.getElementById('search-input').value = queryHistory[historyIndex];
+    }
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex > 0) {
+      historyIndex--;
+      document.getElementById('search-input').value = queryHistory[historyIndex];
+    } else {
+      historyIndex = -1;
+      document.getElementById('search-input').value = '';
+    }
+  }
+});
+
+async function submitQuery(intentOverride) {
+  const query = intentOverride 
+    ? pendingQuery 
+    : document.getElementById('search-input').value.trim();
+  
+  if (!query) return;
+
+  // Add to history
+  if (!intentOverride) {
+    queryHistory.unshift(query);
+    historyIndex = -1;
+    pendingQuery = query;
+  }
+
+  // Check for clarification needed
+  if (!intentOverride) {
+    const clarifyRes = await fetch('/api/clarify', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ query })
+    });
+    const clarifyData = await clarifyRes.json();
+
+    if (clarifyData.needs_clarification) {
+      showClarify(query, clarifyData.options);
+      return;
+    }
+  }
+
+  showLoading();
+
+  try {
+    const res = await fetch('/api/query', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ 
+        query,
+        intent: intentOverride || null,
+        tool: currentTool !== 'all' ? currentTool : null
+      })
+    });
+    const data = await res.json();
+    
+    if (data.error) {
+      showError(data.error);
+      return;
+    }
+
+    if (data.type === 'workflow') {
+      renderWorkflow(data);
+    } else {
+      renderCommand(data);
+    }
+  } catch (err) {
+    showError('Could not connect to the server. Is Flask running?');
+  }
+}
+
+// ── CLARIFY OVERLAY ──
+function showClarify(query, options) {
+  document.getElementById('clarify-query-text').textContent = `"${query}"`;
+  const optContainer = document.getElementById('clarify-options');
+  optContainer.innerHTML = '';
+
+  options.forEach(opt => {
+    const btn = document.createElement('div');
+    btn.className = 'clarify-opt';
+    btn.innerHTML = `
+      <span class="clarify-opt-icon">${opt.icon}</span>
+      <span class="clarify-opt-label">${opt.label}</span>
+    `;
+    btn.onclick = () => {
+      hideClarify();
+      submitQuery(opt.intent);
+    };
+    optContainer.appendChild(btn);
+  });
+
+  document.getElementById('clarify-overlay').classList.add('visible');
+}
+
+function hideClarify() {
+  document.getElementById('clarify-overlay').classList.remove('visible');
+}
+
+document.getElementById('clarify-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) hideClarify();
+});
+
+// ── LOADING ──
+function showLoading() {
+  document.getElementById('empty-state') && 
+    (document.getElementById('empty-state').style.display = 'none');
+  document.getElementById('content').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="loading-text">querying devbrain...</div>
+    </div>
+  `;
+}
+
+function showError(msg) {
+  document.getElementById('content').innerHTML = `
+    <div style="padding:20px; color: var(--red); font-family: var(--mono); font-size:13px;">
+      ✗ ${msg}
+    </div>
+  `;
+}
+
+// ── RENDER COMMAND ──
+function renderCommand(data) {
+  const fresh = !data.from_cache;
+  const breakdownId = 'bd-' + Math.random().toString(36).slice(2);
+
+  const html = `
+    <div class="response-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-tool-badge">${data.tool || 'dev'}</span>
+          <span class="card-title">${data.title}</span>
+        </div>
+        <div class="card-badges">
+          ${fresh ? '<span class="fresh-badge">✦ freshly generated</span>' : ''}
+          <span class="type-badge">&gt;_ command</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="command-block">
+          <div class="command-text" onclick="toggleBreakdown('${breakdownId}', this)">
+            ${escapeHtml(data.command)}
+            <span class="clickable-hint">← click to explain</span>
+          </div>
+          <div class="command-block-footer">
+            <button class="copy-btn" onclick="copyCommand(this, '${escapeJs(data.command)}')">copy</button>
+          </div>
+        </div>
+
+        <button class="breakdown-toggle" id="toggle-${breakdownId}" onclick="toggleBreakdown('${breakdownId}', null)">
+          <span class="toggle-arrow">›</span> explain each part
+        </button>
+
+        <div class="breakdown-section" id="${breakdownId}">
+          ${data.breakdown.map(b => `
+            <div class="breakdown-row">
+              <div class="breakdown-part">${escapeHtml(b.part)}</div>
+              <div class="breakdown-explanation">${escapeHtml(b.explanation)}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="example-block">
+          <div class="example-label">Real Example</div>
+          <div class="example-command">${escapeHtml(data.example.command)}</div>
+          <div class="example-context">${escapeHtml(data.example.context)}</div>
+        </div>
+
+        ${data.warning ? `
+          <div class="warning-block">
+            <span class="warning-icon">⚠</span>
+            <span class="warning-text">${escapeHtml(data.warning)}</span>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── RENDER WORKFLOW ──
+function renderWorkflow(data) {
+  const fresh = !data.from_cache;
+
+  const stepsHtml = data.steps.map((step, i) => {
+    const expandId = 'step-' + i;
+    return `
+      <div class="step-item" id="step-item-${i}">
+        <div class="step-main">
+          <div class="step-check" onclick="toggleStep(${i})" id="check-${i}"></div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">${escapeHtml(step.title)}</span>
+              <div class="step-command-group">
+                <code class="step-command-preview" onclick="toggleStepExpand('${expandId}', event)">${escapeHtml(step.command)}</code>
+                <button class="step-copy-full" onclick="copyCommand(this, '${escapeJs(step.command)}')">⊕ copy</button>
+              </div>
+            </div>
+            <div class="step-explanation">${escapeHtml(step.explanation)}</div>
+          </div>
+        </div>
+        <div class="step-expand" id="${expandId}">
+          <div class="step-expand-label">Command breakdown</div>
+          <div class="step-breakdown">
+            ${step.breakdown.map(b => `
+              <div class="breakdown-row">
+                <div class="breakdown-part">${escapeHtml(b.part)}</div>
+                <div class="breakdown-explanation">${escapeHtml(b.explanation)}</div>
+              </div>
+            `).join('')}
+          </div>
+          ${step.warning ? `
+            <div class="step-warning">
+              <span>⚠</span> ${escapeHtml(step.warning)}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const html = `
+    <div class="response-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-tool-badge">${data.tool || 'dev'}</span>
+          <span class="card-title">${data.title}</span>
+        </div>
+        <div class="card-badges">
+          ${fresh ? '<span class="fresh-badge">✦ freshly generated</span>' : ''}
+          <span class="type-badge">☑ workflow</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="workflow-description">${escapeHtml(data.description)}</div>
+        <div class="steps-list">${stepsHtml}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── INTERACTIONS ──
+function toggleBreakdown(id, commandEl) {
+  const section = document.getElementById(id);
+  const toggle = document.getElementById('toggle-' + id);
+  const isOpen = section.classList.contains('open');
+
+  section.classList.toggle('open', !isOpen);
+  if (toggle) toggle.classList.toggle('open', !isOpen);
+}
+
+function toggleStepExpand(id, e) {
+  e.stopPropagation();
+  const section = document.getElementById(id);
+  section.classList.toggle('open');
+}
+
+function toggleStep(i) {
+  const check = document.getElementById('check-' + i);
+  const item = document.getElementById('step-item-' + i);
+  check.classList.toggle('checked');
+  item.classList.toggle('completed');
+}
+
+function copyCommand(btn, command) {
+  navigator.clipboard.writeText(command);
+  const orig = btn.textContent;
+  btn.textContent = 'copied!';
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.classList.remove('copied');
+  }, 1500);
+}
+
+// ── UTILS ──
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escapeJs(str) {
+  if (!str) return '';
+  return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+// ── INIT ──
+loadWorkflows('all');
+document.getElementById('search-input').focus();
+</script>
+</body>
+</html>
