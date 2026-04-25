@@ -273,18 +273,7 @@
   .search-btn:hover {
     background: var(--green-dim);
   }
-  .clear-btn {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border2);
-    margin-left: 6px;
-  }
 
-  .clear-btn:hover {
-    background: rgba(252, 165, 165, 0.1);
-    color: var(--red);
-    border-color: var(--red);
-  }
   .search-hint {
     font-size: 12px;
     color: var(--text-muted);
@@ -939,6 +928,133 @@
     color: var(--red);
   }
 
+
+  /* ── CHEAT SHEETS ── */
+  .cheatsheets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+    padding: 4px 2px;
+  }
+
+  .cheatsheet-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .cheatsheet-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+
+  .cheatsheet-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .cheatsheet-count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .cheatsheet-commands {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cs-command-row {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .cs-command-row:last-child {
+    border-bottom: none;
+  }
+
+  .cs-command-row:hover {
+    background: var(--bg3);
+  }
+
+  .cs-command-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .cs-command-text {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    flex: 1;
+  }
+
+  .cs-command-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+    flex-shrink: 0;
+    max-width: 180px;
+  }
+
+  .cs-output {
+    display: none;
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .cs-output.open {
+    display: block;
+  }
+
+  .cs-output-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .cs-output-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .cs-copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .cs-copy-btn:hover {
+    color: var(--green);
+    border-color: var(--green-muted);
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -982,6 +1098,15 @@
 
   <div class="sidebar-divider"></div>
 
+  <div class="sidebar-section">
+    <div class="sidebar-label">Reference</div>
+    <button class="tool-btn" id="cheatsheet-nav-btn" onclick="showCheatSheets(this)">
+      <span class="tool-icon">≡</span> Cheat Sheets
+    </button>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
   <div class="sidebar-section workflows">
     <div class="sidebar-label">Workflows</div>
     <div id="workflow-list"></div>
@@ -996,9 +1121,8 @@
       <input type="text" id="search-input"
         placeholder="What are you trying to do? (e.g. undo my last commit)"
         autocomplete="off" autocorrect="off" spellcheck="false">
-     <div class="search-suffix">
+      <div class="search-suffix">
         <button class="search-btn" onclick="submitQuery()">ask</button>
-        <button class="search-btn clear-btn" onclick="clearSearch()">✕</button>
       </div>
     </div>
     <div class="search-hint">
@@ -1096,11 +1220,6 @@ document.getElementById('search-input').addEventListener('keydown', e => {
     }
   }
 });
-
-function clearSearch() {
-  document.getElementById('search-input').value = '';
-  document.getElementById('search-input').focus();
-}
 
 async function submitQuery(intentOverride) {
   const query = intentOverride 
@@ -1381,7 +1500,184 @@ function escapeJs(str) {
   return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
 }
 
+// ── CHEAT SHEETS DATA ──
+const CHEAT_SHEETS = [
+  {
+    id: "git-basics",
+    tool: "git",
+    title: "Git — Start to Push",
+    description: "Full workflow from a new project to code on GitHub",
+    commands: [
+      {
+        cmd: "git init",
+        desc: "Initialize a repo",
+        output: "Initialized empty Git repository in /your-project/.git/"
+      },
+      {
+        cmd: "git branch -m main",
+        desc: "Rename branch to main",
+        output: "(no output — prompt updates to show 'main')"
+      },
+      {
+        cmd: "echo '.venv/\\n__pycache__/' > .gitignore",
+        desc: "Create a .gitignore",
+        output: "(no output — creates the file silently)"
+      },
+      {
+        cmd: "git add .",
+        desc: "Stage all files",
+        output: "(no output — files are staged and ready to commit)"
+      },
+      {
+        cmd: "git commit -m \"Initial commit\"",
+        desc: "Save your first snapshot",
+        output: "[main (root-commit) 3b9a8ac] Initial commit\n 4 files changed, 312 insertions(+)\n create mode 100644 app.py\n create mode 100644 requirements.txt"
+      },
+      {
+        cmd: "git remote add origin git@github.com:username/repo.git",
+        desc: "Connect to GitHub",
+        output: "(no output — remote 'origin' is now set)"
+      },
+      {
+        cmd: "git push -u origin main",
+        desc: "Push to GitHub",
+        output: "Enumerating objects: 6, done.\nCounting objects: 100% (6/6), done.\nWriting objects: 100% (6/6), 1.23 KiB | 1.23 MiB/s, done.\nTo github.com:username/repo.git\n * [new branch]  main -> main"
+      }
+    ]
+  },
+  {
+    id: "git-branch-merge",
+    tool: "git",
+    title: "Git — Branch & Merge",
+    description: "Create a feature branch, make changes, and merge back to main",
+    commands: [
+      {
+        cmd: "git checkout -b feature/my-feature",
+        desc: "Create and switch to branch",
+        output: "Switched to a new branch 'feature/my-feature'"
+      },
+      {
+        cmd: "git add .",
+        desc: "Stage your changes",
+        output: "(no output — files staged)"
+      },
+      {
+        cmd: "git commit -m \"Describe your change\"",
+        desc: "Commit on the branch",
+        output: "[feature/my-feature 32dabab] Describe your change\n 1 file changed, 18 insertions(+)"
+      },
+      {
+        cmd: "git checkout main",
+        desc: "Switch back to main",
+        output: "Switched to branch 'main'\nYour branch is up to date with 'origin/main'."
+      },
+      {
+        cmd: "git merge feature/my-feature",
+        desc: "Merge branch into main",
+        output: "Updating 3b9a8ac..32dabab\nFast-forward\n templates/index.html | 19 ++++++++++++++++++-\n 1 file changed, 18 insertions(+)"
+      },
+      {
+        cmd: "git push",
+        desc: "Push merged code to GitHub",
+        output: "Writing objects: 100% (4/4), 573 bytes | 573.00 KiB/s, done.\nTo github.com:username/repo.git\n   3b9a8ac..32dabab  main -> main"
+      }
+    ]
+  }
+];
+
+// ── COMMAND COLORIZER ──
+function colorizeCommand(cmd) {
+  const tokens = cmd.match(/(".*?"|'.*?'|`.*?`|\S+)/g);
+  if (!tokens) return escapeHtml(cmd);
+
+  return tokens.map((token, i) => {
+    const escaped = escapeHtml(token);
+    // First token = base command (git, docker, python3, etc.)
+    if (i === 0) {
+      return `<span style="color:var(--text)">${escaped}</span>`;
+    }
+    // Flags: start with - or --
+    if (token.startsWith('-')) {
+      return `<span style="color:var(--green)">${escaped}</span>`;
+    }
+    // Quoted strings
+    if ((token.startsWith('"') && token.endsWith('"')) ||
+        (token.startsWith("'") && token.endsWith("'"))) {
+      return `<span style="color:var(--yellow)">${escaped}</span>`;
+    }
+    // Second token = subcommand (commit, push, init, etc.)
+    if (i === 1) {
+      return `<span style="color:var(--blue)">${escaped}</span>`;
+    }
+    // Remaining arguments (branch names, remotes, paths)
+    return `<span style="color:var(--yellow)">${escaped}</span>`;
+  }).join(' ');
+}
+
+// ── CHEAT SHEETS DISPLAY ──
+function showCheatSheets(btn) {
+  // Update sidebar active state
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Hide search bar
+  document.querySelector('.search-area').style.display = 'none';
+
+  // Render cheat sheets
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div style="padding: 28px;">
+      <div style="margin-bottom: 20px;">
+        <div style="font-size:18px; font-weight:500; color:var(--text); margin-bottom:4px;">Cheat Sheets</div>
+        <div style="font-size:13px; color:var(--text-muted); font-family:var(--mono);">Click any command to see expected output</div>
+      </div>
+      <div class="cheatsheets-grid">
+        ${CHEAT_SHEETS.map(sheet => renderCheatSheetCard(sheet)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderCheatSheetCard(sheet) {
+  return `
+    <div class="cheatsheet-card">
+      <div class="cheatsheet-header">
+        <span class="card-tool-badge">${sheet.tool}</span>
+        <span class="cheatsheet-title">${sheet.title}</span>
+        <span class="cheatsheet-count">${sheet.commands.length} commands</span>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); padding: 10px 16px 8px; border-bottom: 1px solid var(--border);">${sheet.description}</div>
+      <div class="cheatsheet-commands">
+        ${sheet.commands.map((c, i) => `
+          <div class="cs-command-row" onclick="toggleCsOutput('${sheet.id}-${i}')">
+            <div class="cs-command-main">
+              <span class="cs-command-text">${colorizeCommand(c.cmd)}</span>
+              <span class="cs-command-desc">${escapeHtml(c.desc)}</span>
+              <button class="cs-copy-btn" onclick="event.stopPropagation(); copyCommand(this, '${escapeJs(c.cmd)}')">copy</button>
+            </div>
+            <div class="cs-output" id="${sheet.id}-${i}">
+              <div class="cs-output-label">Expected output</div>
+              <div class="cs-output-text">${escapeHtml(c.output)}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function toggleCsOutput(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
 // ── INIT ──
+// Restore search bar when a tool is selected
+const origSelectTool = selectTool;
+function selectTool(btn, tool) {
+  document.querySelector('.search-area').style.display = '';
+  origSelectTool(btn, tool);
+}
+
 loadWorkflows('all');
 document.getElementById('search-input').focus();
 </script>
