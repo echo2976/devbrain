@@ -13,18 +13,297 @@
     --bg3: #161a16;
     --border: #2a332c;
     --border2: #344038;
-    --green: #a3f7b5;
-    --green-dim: #86efac;
-    --green-muted: #2d6b47;
-    --green-glow: rgba(163, 247, 181, 0.10);
+    --accent: #a3f7b5;
+    --accent-dim: #86efac;
+    --accent-muted: #2d6b47;
+    --accent-glow: rgba(163, 247, 181, 0.10);
     --text: #f0f5f1;
     --text-dim: #c0d4c5;
     --text-muted: #7a9880;
     --yellow: #fde68a;
     --red: #fca5a5;
     --blue: #93c5fd;
+    /* syntax colors — fixed across all themes */
+    --syn-base: #f0f5f1;
+    --syn-sub: #93c5fd;
+    --syn-flag: #a3f7b5;
+    --syn-arg: #fde68a;
     --mono: 'JetBrains Mono', monospace;
     --sans: 'DM Sans', sans-serif;
+  }
+
+  /* ── THEMES ── */
+  [data-theme="amber"] {
+    --bg: #0c0a06;
+    --bg2: #131008;
+    --bg3: #1a160a;
+    --border: #332d1a;
+    --border2: #40380f;
+    --accent: #fcd34d;
+    --accent-dim: #f59e0b;
+    --accent-muted: #6b4e00;
+    --accent-glow: rgba(252, 211, 77, 0.10);
+    --text: #fdf8e7;
+    --text-dim: #d4c48a;
+    --text-muted: #8a7a40;
+  }
+
+  [data-theme="arctic"] {
+    --bg: #060a0f;
+    --bg2: #090f18;
+    --bg3: #0f1820;
+    --border: #1a2a3a;
+    --border2: #1e3448;
+    --accent: #7dd3fc;
+    --accent-dim: #38bdf8;
+    --accent-muted: #0c3a5c;
+    --accent-glow: rgba(125, 211, 252, 0.10);
+    --text: #e8f4fd;
+    --text-dim: #a0c4d8;
+    --text-muted: #4a7a94;
+  }
+
+  [data-theme="rose"] {
+    --bg: #0c080a;
+    --bg2: #120a0e;
+    --bg3: #1a0f14;
+    --border: #3a1a24;
+    --border2: #4a1f2e;
+    --accent: #fda4af;
+    --accent-dim: #fb7185;
+    --accent-muted: #6b1a2a;
+    --accent-glow: rgba(253, 164, 175, 0.10);
+    --text: #fdf0f2;
+    --text-dim: #d4a0aa;
+    --text-muted: #8a5060;
+  }
+
+  [data-theme="slate"] {
+    --bg: #08080f;
+    --bg2: #0d0d18;
+    --bg3: #131320;
+    --border: #252538;
+    --border2: #2e2e48;
+    --accent: #c4b5fd;
+    --accent-dim: #a78bfa;
+    --accent-muted: #3b2f6b;
+    --accent-glow: rgba(196, 181, 253, 0.10);
+    --text: #f0effe;
+    --text-dim: #b8b0d8;
+    --text-muted: #6a6090;
+  }
+
+  /* ── LIGHT THEMES ── */
+  [data-theme="light"] {
+    --bg: #f5f7f5;
+    --bg2: #ffffff;
+    --bg3: #edf2ed;
+    --border: #ccdacc;
+    --border2: #b8ccb8;
+    --accent: #16803c;
+    --accent-dim: #15803d;
+    --accent-muted: #bbf7d0;
+    --accent-glow: rgba(22, 128, 60, 0.08);
+    --text: #0f1f10;
+    --text-dim: #2d4a30;
+    --text-muted: #5a7a5c;
+    --syn-base: #0f1f10;
+    --syn-sub: #1d4ed8;
+    --syn-flag: #16803c;
+    --syn-arg: #b45309;
+  }
+
+  [data-theme="light-amber"] {
+    --bg: #fdf8ed;
+    --bg2: #fffdf5;
+    --bg3: #f5edda;
+    --border: #e0d0a0;
+    --border2: #ccbc88;
+    --accent: #b45309;
+    --accent-dim: #92400e;
+    --accent-muted: #fde68a;
+    --accent-glow: rgba(180, 83, 9, 0.08);
+    --text: #1c1208;
+    --text-dim: #3d2808;
+    --text-muted: #7a5a20;
+    --syn-base: #1c1208;
+    --syn-sub: #1d4ed8;
+    --syn-flag: #b45309;
+    --syn-arg: #6d28d9;
+  }
+
+  [data-theme="light-arctic"] {
+    --bg: #f0f7ff;
+    --bg2: #ffffff;
+    --bg3: #e4f0fc;
+    --border: #bcd8f0;
+    --border2: #a0c8e8;
+    --accent: #0369a1;
+    --accent-dim: #0284c7;
+    --accent-muted: #bae6fd;
+    --accent-glow: rgba(3, 105, 161, 0.08);
+    --text: #0a1628;
+    --text-dim: #1e3a54;
+    --text-muted: #4a7a9a;
+    --syn-base: #0a1628;
+    --syn-sub: #0369a1;
+    --syn-flag: #0e7490;
+    --syn-arg: #b45309;
+  }
+
+  [data-theme="light-rose"] {
+    --bg: #fff5f6;
+    --bg2: #ffffff;
+    --bg3: #ffe8eb;
+    --border: #f0c0c8;
+    --border2: #e0a0aa;
+    --accent: #be123c;
+    --accent-dim: #e11d48;
+    --accent-muted: #fecdd3;
+    --accent-glow: rgba(190, 18, 60, 0.08);
+    --text: #1c080c;
+    --text-dim: #3d1020;
+    --text-muted: #8a4050;
+    --syn-base: #1c080c;
+    --syn-sub: #1d4ed8;
+    --syn-flag: #be123c;
+    --syn-arg: #b45309;
+  }
+
+  [data-theme="light-slate"] {
+    --bg: #f4f3ff;
+    --bg2: #ffffff;
+    --bg3: #ebe8ff;
+    --border: #c8c0f0;
+    --border2: #b0a8e0;
+    --accent: #5b21b6;
+    --accent-dim: #6d28d9;
+    --accent-muted: #ddd6fe;
+    --accent-glow: rgba(91, 33, 182, 0.08);
+    --text: #0f0a1e;
+    --text-dim: #2a1a4a;
+    --text-muted: #6050a0;
+    --syn-base: #0f0a1e;
+    --syn-sub: #1d4ed8;
+    --syn-flag: #5b21b6;
+    --syn-arg: #b45309;
+  }
+
+  /* ── SETTINGS PAGE ── */
+  .settings-page {
+    padding: 28px;
+    max-width: 600px;
+  }
+
+  .settings-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .settings-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-bottom: 28px;
+  }
+
+  .settings-section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .theme-swatch {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--border2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .theme-swatch:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .theme-swatch.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .swatch-preview {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
+  }
+
+  .swatch-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .swatch-line {
+    height: 2px;
+    border-radius: 1px;
+    flex: 1;
+    opacity: 0.5;
+  }
+
+  .swatch-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 6px 12px;
+    background: var(--bg2);
+    text-align: center;
+  }
+
+  /* ── GEAR ICON ── */
+  .gear-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 14px;
+    width: 32px;
+    height: 32px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    z-index: 10;
+  }
+
+  .gear-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent-muted);
+    background: var(--accent-glow);
+  }
+
+  .gear-btn.active {
+    color: var(--accent);
+    border-color: var(--accent-muted);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,7 +351,7 @@
     font-family: var(--mono);
     font-size: 18px;
     font-weight: 600;
-    color: var(--green);
+    color: var(--accent);
     letter-spacing: -0.5px;
   }
 
@@ -127,9 +406,9 @@
   }
 
   .tool-btn.active {
-    background: var(--green-glow);
-    color: var(--green);
-    border-color: var(--green-muted);
+    background: var(--accent-glow);
+    color: var(--accent);
+    border-color: var(--accent-muted);
   }
 
   .tool-icon {
@@ -141,7 +420,7 @@
   }
 
   .tool-btn.active .tool-icon {
-    color: var(--green-dim);
+    color: var(--accent-dim);
   }
 
   .sidebar-divider {
@@ -208,7 +487,7 @@
   .search-prefix {
     font-family: var(--mono);
     font-size: 16px;
-    color: var(--green);
+    color: var(--accent);
     padding: 12px 0 12px 16px;
     background: var(--bg3);
     border: 1px solid var(--border2);
@@ -238,12 +517,12 @@
   }
 
   #search-input:focus {
-    border-color: var(--green-muted);
+    border-color: var(--accent-muted);
   }
 
   #search-input:focus + .search-suffix,
   #search-input:focus ~ .search-prefix {
-    border-color: var(--green-muted);
+    border-color: var(--accent-muted);
   }
 
   .search-suffix {
@@ -257,7 +536,7 @@
   }
 
   .search-btn {
-    background: var(--green);
+    background: var(--accent);
     color: var(--bg);
     border: none;
     border-radius: 5px;
@@ -271,7 +550,7 @@
   }
 
   .search-btn:hover {
-    background: var(--green-dim);
+    background: var(--accent-dim);
   }
 
   .clear-btn {
@@ -377,9 +656,9 @@
   }
 
   .clarify-opt:hover {
-    border-color: var(--green-muted);
-    background: var(--green-glow);
-    color: var(--green);
+    border-color: var(--accent-muted);
+    background: var(--accent-glow);
+    color: var(--accent);
   }
 
   .clarify-opt-icon {
@@ -391,7 +670,7 @@
   }
 
   .clarify-opt:hover .clarify-opt-icon {
-    color: var(--green);
+    color: var(--accent);
   }
 
   .clarify-opt-label {
@@ -420,7 +699,7 @@
   .empty-terminal {
     font-family: var(--mono);
     font-size: 48px;
-    color: var(--green);
+    color: var(--accent);
     margin-bottom: 16px;
     opacity: 0.3;
   }
@@ -458,7 +737,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--accent);
     animation: pulse 1.2s infinite;
   }
 
@@ -509,8 +788,8 @@
   .card-tool-badge {
     font-family: var(--mono);
     font-size: 10px;
-    background: var(--green-muted);
-    color: var(--green);
+    background: var(--accent-muted);
+    color: var(--accent);
     padding: 2px 8px;
     border-radius: 4px;
     text-transform: uppercase;
@@ -584,19 +863,19 @@
   }
 
   .copy-btn:hover {
-    color: var(--green);
-    border-color: var(--green-muted);
+    color: var(--accent);
+    border-color: var(--accent-muted);
   }
 
   .copy-btn.copied {
-    color: var(--green);
-    border-color: var(--green-muted);
+    color: var(--accent);
+    border-color: var(--accent-muted);
   }
 
   .command-text {
     font-family: var(--mono);
     font-size: 15px;
-    color: var(--green);
+    color: var(--accent);
     padding: 14px 16px;
     word-break: break-all;
     line-height: 1.5;
@@ -605,7 +884,7 @@
   }
 
   .command-text:hover {
-    background: var(--green-glow);
+    background: var(--accent-glow);
   }
 
   .command-text .clickable-hint {
@@ -653,7 +932,7 @@
   .breakdown-part {
     font-family: var(--mono);
     font-size: 13px;
-    color: var(--green);
+    color: var(--accent);
     padding: 10px 14px;
     min-width: 160px;
     border-right: 1px solid var(--border);
@@ -683,7 +962,7 @@
   }
 
   .breakdown-toggle:hover {
-    color: var(--green);
+    color: var(--accent);
   }
 
   .toggle-arrow {
@@ -799,12 +1078,12 @@
   }
 
   .step-check:hover {
-    border-color: var(--green-dim);
+    border-color: var(--accent-dim);
   }
 
   .step-check.checked {
-    background: var(--green);
-    border-color: var(--green);
+    background: var(--accent);
+    border-color: var(--accent);
   }
 
   .step-check.checked::after {
@@ -849,7 +1128,7 @@
   .step-command-preview {
     font-family: var(--mono);
     font-size: 12px;
-    color: var(--green);
+    color: var(--accent);
     background: var(--bg);
     padding: 2px 8px;
     border-radius: 4px;
@@ -863,8 +1142,8 @@
   }
 
   .step-command-preview:hover {
-    border-color: var(--green-muted);
-    color: var(--green-dim);
+    border-color: var(--accent-muted);
+    color: var(--accent-dim);
   }
 
   .step-explanation {
@@ -924,8 +1203,8 @@
   }
 
   .step-copy-full:hover {
-    color: var(--green);
-    border-color: var(--green-muted);
+    color: var(--accent);
+    border-color: var(--accent-muted);
   }
 
   .step-warning {
@@ -1010,7 +1289,7 @@
   .cs-command-text {
     font-family: var(--mono);
     font-size: 13px;
-    color: var(--green);
+    color: var(--accent);
     flex: 1;
   }
 
@@ -1064,8 +1343,8 @@
   }
 
   .cs-copy-btn:hover {
-    color: var(--green);
-    border-color: var(--green-muted);
+    color: var(--accent);
+    border-color: var(--accent-muted);
   }
 
   .platform-toggle {
@@ -1099,8 +1378,8 @@
   }
 
   .platform-btn.active {
-    background: var(--green-muted);
-    color: var(--green);
+    background: var(--accent-muted);
+    color: var(--accent);
   }
 
   /* ── CLAUDE CODE TIPS ── */
@@ -1165,7 +1444,7 @@
     border: 1px solid var(--border2);
     border-radius: 6px;
     padding: 8px 12px;
-    color: var(--green);
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1243,6 +1522,9 @@
   </div>
 </aside>
 
+<!-- GEAR BUTTON -->
+<button class="gear-btn" id="gear-btn" onclick="showSettings(this)" title="Settings">⚙</button>
+
 <!-- MAIN -->
 <main class="main">
   <div class="search-area">
@@ -1307,6 +1589,7 @@ function setPlatform(platform) {
 // ── TOOL SELECTION ──
 function selectTool(btn, tool) {
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('gear-btn').classList.remove('active');
   btn.classList.add('active');
   currentTool = tool;
   document.querySelector('.search-area').style.display = '';
@@ -1890,23 +2173,23 @@ function colorizeCommand(cmd) {
     const escaped = escapeHtml(token);
     // First token = base command (git, docker, python3, etc.)
     if (i === 0) {
-      return `<span style="color:var(--text)">${escaped}</span>`;
+      return `<span style="color:var(--syn-base)">${escaped}</span>`;
     }
     // Flags: start with - or --
     if (token.startsWith('-')) {
-      return `<span style="color:var(--green)">${escaped}</span>`;
+      return `<span style="color:var(--syn-flag)">${escaped}</span>`;
     }
     // Quoted strings
     if ((token.startsWith('"') && token.endsWith('"')) ||
         (token.startsWith("'") && token.endsWith("'"))) {
-      return `<span style="color:var(--yellow)">${escaped}</span>`;
+      return `<span style="color:var(--syn-arg)">${escaped}</span>`;
     }
     // Second token = subcommand (commit, push, init, etc.)
     if (i === 1) {
-      return `<span style="color:var(--blue)">${escaped}</span>`;
+      return `<span style="color:var(--syn-sub)">${escaped}</span>`;
     }
     // Remaining arguments (branch names, remotes, paths)
-    return `<span style="color:var(--yellow)">${escaped}</span>`;
+    return `<span style="color:var(--syn-arg)">${escaped}</span>`;
   }).join(' ');
 }
 
@@ -1915,6 +2198,7 @@ function showCheatSheets(btn) {
   // Update sidebar active state
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('gear-btn').classList.remove('active');
 
   // Hide search bar
   document.querySelector('.search-area').style.display = 'none';
@@ -2067,6 +2351,7 @@ const CLAUDE_CODE_TIPS = [
 function showClaudeCodeTips(btn) {
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('gear-btn').classList.remove('active');
   document.querySelector('.search-area').style.display = 'none';
 
   // Group tips by category
@@ -2081,7 +2366,7 @@ function showClaudeCodeTips(btn) {
       <div style="
         font-family: var(--mono);
         font-size: 11px;
-        color: var(--green);
+        color: var(--accent);
         text-transform: uppercase;
         letter-spacing: 1.5px;
         margin-bottom: 12px;
@@ -2130,7 +2415,83 @@ function showClaudeCodeTips(btn) {
   `;
 }
 
+// ── THEMES ──
+const THEMES = {
+  dark: [
+    { id: "default",      name: "Default", bg: "#0a0c0b", accent: "#a3f7b5", border: "#2a332c" },
+    { id: "amber",        name: "Amber",   bg: "#0c0a06", accent: "#fcd34d", border: "#332d1a" },
+    { id: "arctic",       name: "Arctic",  bg: "#060a0f", accent: "#7dd3fc", border: "#1a2a3a" },
+    { id: "rose",         name: "Rose",    bg: "#0c080a", accent: "#fda4af", border: "#3a1a24" },
+    { id: "slate",        name: "Slate",   bg: "#08080f", accent: "#c4b5fd", border: "#252538" }
+  ],
+  light: [
+    { id: "light",        name: "Light",   bg: "#f5f7f5", accent: "#16803c", border: "#ccdacc" },
+    { id: "light-amber",  name: "Amber",   bg: "#fdf8ed", accent: "#b45309", border: "#e0d0a0" },
+    { id: "light-arctic", name: "Arctic",  bg: "#f0f7ff", accent: "#0369a1", border: "#bcd8f0" },
+    { id: "light-rose",   name: "Rose",    bg: "#fff5f6", accent: "#be123c", border: "#f0c0c8" },
+    { id: "light-slate",  name: "Slate",   bg: "#f4f3ff", accent: "#5b21b6", border: "#c8c0f0" }
+  ]
+};
+
+function applyTheme(themeId) {
+  document.documentElement.setAttribute('data-theme', themeId === 'default' ? '' : themeId);
+  localStorage.setItem('devbrain-theme', themeId);
+}
+
+function showSettings(btn) {
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.search-area').style.display = 'none';
+  document.getElementById('gear-btn').classList.add('active');
+
+  const savedTheme = localStorage.getItem('devbrain-theme') || 'default';
+
+  function swatchHtml(theme) {
+    return `
+      <div class="theme-swatch ${savedTheme === theme.id ? 'active' : ''}"
+           id="swatch-${theme.id}"
+           onclick="selectTheme('${theme.id}')">
+        <div class="swatch-preview" style="background:${theme.bg}">
+          <div class="swatch-dot" style="background:${theme.accent}"></div>
+          <div class="swatch-line" style="background:${theme.accent}"></div>
+          <div class="swatch-dot" style="background:${theme.border}; width:5px; height:5px;"></div>
+        </div>
+        <div class="swatch-label" style="background:${theme.bg}; color:${theme.accent}; border-top: 1px solid ${theme.border};">
+          ${theme.name}
+        </div>
+      </div>
+    `;
+  }
+
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="settings-page">
+      <div class="settings-title">Settings</div>
+      <div class="settings-sub">// preferences and customization</div>
+
+      <div class="settings-section-label">Dark themes</div>
+      <div class="theme-grid" style="margin-bottom: 24px;">
+        ${THEMES.dark.map(swatchHtml).join('')}
+      </div>
+
+      <div class="settings-section-label">Light themes</div>
+      <div class="theme-grid">
+        ${THEMES.light.map(swatchHtml).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function selectTheme(themeId) {
+  applyTheme(themeId);
+  // Update active swatch
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+  document.getElementById('swatch-' + themeId)?.classList.add('active');
+}
+
 // ── INIT ──
+// Load saved theme
+const savedTheme = localStorage.getItem('devbrain-theme') || 'default';
+applyTheme(savedTheme);
 // Restore search bar when a tool is selected
 loadWorkflows('all');
 document.getElementById('search-input').focus();
