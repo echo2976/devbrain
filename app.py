@@ -51,6 +51,20 @@ def detect_intent(query):
             return "workflow"
     return "command"
 
+def is_command_input(query):
+    """Detect if the user typed an actual command rather than a question."""
+    q = query.strip()
+    command_starters = [
+        "git ", "docker ", "python3 ", "python ", "pip ", "npm ", "npx ",
+        "node ", "ssh ", "chmod ", "grep ", "find ", "ls ", "cd ", "mkdir ",
+        "rm ", "mv ", "cp ", "cat ", "echo ", "curl ", "wget ", "brew ",
+        "source ", "export ", "code "
+    ]
+    question_words = ["how", "what", "why", "when", "where", "can", "should", "do", "does", "is"]
+    has_question = any(q.lower().startswith(w) for w in question_words) or q.endswith("?")
+    starts_with_command = any(q.startswith(c) for c in command_starters)
+    return starts_with_command and not has_question
+
 def detect_tool(query):
     q = query.lower()
     tools = {
@@ -113,7 +127,23 @@ For WORKFLOW queries, respond with:
   ]
 }
 
-Be accurate, beginner-friendly, and practical. Real examples over abstract ones."""
+Be accurate, beginner-friendly, and practical. Real examples over abstract ones.
+
+For ANALYZE queries (user pasted an actual command), respond with:
+{
+  "type": "analyze",
+  "tool": "git|docker|vscode|terminal|python|node",
+  "title": "Short descriptive title of what this command does",
+  "command": "the exact command as provided",
+  "summary": "One plain English sentence describing what this command does overall",
+  "breakdown": [
+    {"part": "git", "explanation": "the git program"},
+    {"part": "rebase", "explanation": "replays commits on top of another branch"},
+    {"-i", "explanation": "interactive mode — opens an editor so you can choose what to do with each commit"},
+    {"HEAD~3", "explanation": "the last 3 commits from your current position"}
+  ],
+  "warning": "optional warning string or null"
+}"""
 
 def query_claude(query, intent):
     client = anthropic.Anthropic()
@@ -128,7 +158,6 @@ def query_claude(query, intent):
     )
     
     raw = message.content[0].text.strip()
-    # Strip any accidental markdown fences
     raw = re.sub(r'^```json\s*', '', raw)
     raw = re.sub(r'\s*```$', '', raw)
     return json.loads(raw)
@@ -146,7 +175,12 @@ def handle_query():
     if not query:
         return jsonify({"error": "No query provided"}), 400
     
-    intent = intent_override or detect_intent(query)
+    # Detect if user typed an actual command vs a question
+    if not intent_override and is_command_input(query):
+        intent = "analyze"
+    else:
+        intent = intent_override or detect_intent(query)
+    
     tool = detect_tool(query)
     key = cache_key(f"{intent}:{query}")
     

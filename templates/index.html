@@ -274,6 +274,19 @@
     background: var(--green-dim);
   }
 
+  .clear-btn {
+    background: transparent;
+    color: #f87171;
+    border: 1px solid #7f2e2e;
+    margin-left: 6px;
+  }
+
+  .clear-btn:hover {
+    background: rgba(248, 113, 113, 0.15);
+    color: #fca5a5;
+    border-color: #f87171;
+  }
+
   .search-hint {
     font-size: 12px;
     color: var(--text-muted);
@@ -1123,6 +1136,7 @@
         autocomplete="off" autocorrect="off" spellcheck="false">
       <div class="search-suffix">
         <button class="search-btn" onclick="submitQuery()">ask</button>
+        <button class="search-btn clear-btn" onclick="clearSearch()">✕</button>
       </div>
     </div>
     <div class="search-hint">
@@ -1165,6 +1179,18 @@ function selectTool(btn, tool) {
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentTool = tool;
+  document.querySelector('.search-area').style.display = '';
+  document.getElementById('content').innerHTML = `
+    <div class="empty-state" id="empty-state">
+      <div class="empty-terminal">&gt;_</div>
+      <div class="empty-title">Ask anything about your dev tools</div>
+      <div class="empty-sub">
+        "how do I undo a commit"<br>
+        "set up a new Python project"<br>
+        "what does docker-compose up do"
+      </div>
+    </div>
+  `;
   loadWorkflows(tool);
 }
 
@@ -1221,6 +1247,11 @@ document.getElementById('search-input').addEventListener('keydown', e => {
   }
 });
 
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-input').focus();
+}
+
 async function submitQuery(intentOverride) {
   const query = intentOverride 
     ? pendingQuery 
@@ -1271,6 +1302,8 @@ async function submitQuery(intentOverride) {
 
     if (data.type === 'workflow') {
       renderWorkflow(data);
+    } else if (data.type === 'analyze') {
+      renderAnalyze(data);
     } else {
       renderCommand(data);
     }
@@ -1377,6 +1410,58 @@ function renderCommand(data) {
           <div class="example-label">Real Example</div>
           <div class="example-command">${colorizeCommand(data.example.command)}</div>
           <div class="example-context">${escapeHtml(data.example.context)}</div>
+        </div>
+
+        ${data.warning ? `
+          <div class="warning-block">
+            <span class="warning-icon">⚠</span>
+            <span class="warning-text">${escapeHtml(data.warning)}</span>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── RENDER ANALYZE ──
+function renderAnalyze(data) {
+  const fresh = !data.from_cache;
+
+  const html = `
+    <div class="response-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-tool-badge">${data.tool || 'dev'}</span>
+          <span class="card-title">${data.title}</span>
+        </div>
+        <div class="card-badges">
+          ${fresh ? '<span class="fresh-badge">✦ freshly generated</span>' : ''}
+          <span class="type-badge">⊙ analyzed</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="command-block">
+          <div class="command-text">
+            ${colorizeCommand(data.command)}
+          </div>
+          <div class="command-block-footer">
+            <button class="copy-btn" onclick="copyCommand(this, '${escapeJs(data.command)}')">copy</button>
+          </div>
+        </div>
+
+        <div style="font-size:13px; color:var(--text-dim); line-height:1.6; padding: 2px 2px;">
+          ${escapeHtml(data.summary)}
+        </div>
+
+        <div class="breakdown-section open">
+          ${data.breakdown.map(b => `
+            <div class="breakdown-row">
+              <div class="breakdown-part">${escapeHtml(b.part)}</div>
+              <div class="breakdown-explanation">${escapeHtml(b.explanation)}</div>
+            </div>
+          `).join('')}
         </div>
 
         ${data.warning ? `
@@ -1672,12 +1757,6 @@ function toggleCsOutput(id) {
 
 // ── INIT ──
 // Restore search bar when a tool is selected
-const origSelectTool = selectTool;
-function selectTool(btn, tool) {
-  document.querySelector('.search-area').style.display = '';
-  origSelectTool(btn, tool);
-}
-
 loadWorkflows('all');
 document.getElementById('search-input').focus();
 </script>
