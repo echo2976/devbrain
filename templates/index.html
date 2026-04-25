@@ -273,7 +273,18 @@
   .search-btn:hover {
     background: var(--green-dim);
   }
+  .clear-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border2);
+    margin-left: 6px;
+  }
 
+  .clear-btn:hover {
+    background: rgba(252, 165, 165, 0.1);
+    color: var(--red);
+    border-color: var(--red);
+  }
   .search-hint {
     font-size: 12px;
     color: var(--text-muted);
@@ -985,8 +996,9 @@
       <input type="text" id="search-input"
         placeholder="What are you trying to do? (e.g. undo my last commit)"
         autocomplete="off" autocorrect="off" spellcheck="false">
-      <div class="search-suffix">
+     <div class="search-suffix">
         <button class="search-btn" onclick="submitQuery()">ask</button>
+        <button class="search-btn clear-btn" onclick="clearSearch()">✕</button>
       </div>
     </div>
     <div class="search-hint">
@@ -1084,6 +1096,11 @@ document.getElementById('search-input').addEventListener('keydown', e => {
     }
   }
 });
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-input').focus();
+}
 
 async function submitQuery(intentOverride) {
   const query = intentOverride 
