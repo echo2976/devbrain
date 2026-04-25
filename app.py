@@ -5,6 +5,7 @@ import os
 import hashlib
 import re
 from pathlib import Path
+from config import load_config, get_api_credentials, save_credentials
 
 app = Flask(__name__)
 
@@ -146,7 +147,11 @@ For ANALYZE queries (user pasted an actual command), respond with:
 }"""
 
 def query_claude(query, intent, platform='github'):
-    client = anthropic.Anthropic()
+    creds = get_api_credentials()
+    api_key = creds.get("anthropic_api_key") or os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        raise ValueError("No Anthropic API key configured. Add it in Settings → Configure API Access.")
+    client = anthropic.Anthropic(api_key=api_key)
     
     platform_context = ""
     if platform == 'gitlab':
@@ -271,6 +276,21 @@ def get_workflows():
         ]
     }
     return jsonify(workflows)
+
+@app.route("/api/config", methods=["GET"])
+def get_config():
+    """Return config with boolean flags for saved secrets — never actual values."""
+    return jsonify(load_config())
+
+@app.route("/api/config", methods=["POST"])
+def update_config():
+    """Save credential updates."""
+    data = request.json
+    try:
+        save_credentials(data)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

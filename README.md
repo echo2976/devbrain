@@ -2,7 +2,7 @@
 
 Type what you want to do. Get the command, the explanation, or a full walkthrough. Paste a command you don't recognize and it breaks down every part. Built for learning dev tools without the context-switching.
 
-Requires an Anthropic API key.
+Requires an Anthropic API key (entered once via the app — no environment variables needed).
 
 ## Features
 
@@ -12,13 +12,17 @@ Workflow guide — describe a task and get a step-by-step checklist you can foll
 
 Command analyzer — paste any command and get it explained. Auto-detected when you type a command instead of a question.
 
-Cheat sheets — quick reference cards for common command sequences, syntax-highlighted with expected output on click. Includes GitHub and GitLab variants for Git workflows.
+Cheat sheets — quick reference cards for common command sequences, syntax-highlighted with expected output on click. Includes GitHub and GitLab variants for Git workflows, plus a terminal reference card.
 
 Claude Code tips — curated tips organized by category: setup, workflow, prompting, context, and Git integration.
 
 Smart intent detection — the app figures out whether you want a command, workflow, or analysis. If it's ambiguous, it asks.
 
 Caching — responses save locally so repeat lookups are instant. New responses show a "✦ freshly generated" badge.
+
+Color themes — 5 dark and 5 light themes, picked from the ⚙ settings page. Your choice persists across restarts.
+
+Credential management — API keys are entered once through Settings → Configure API Access. They're encrypted with Fernet and stored in `instance/config.json`, which is never committed to git. The browser never sees the actual key value — only the Flask backend decrypts it at request time.
 
 ## Tools covered
 
@@ -32,8 +36,7 @@ Git (GitHub + GitLab), Docker, VS Code / Cursor, Terminal / Bash, Python, Node /
 cd ~/projects/devbrain
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-export ANTHROPIC_API_KEY="your-key-here"
+python3 -m pip install -r requirements.txt
 python3 app.py
 ```
 
@@ -44,13 +47,14 @@ cd %USERPROFILE%\projects\devbrain
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-set ANTHROPIC_API_KEY=your-key-here
 python app.py
 ```
 
 Open http://127.0.0.1:5001 in your browser.
 
-Each new terminal session needs `source .venv/bin/activate` (Mac/Linux) or `.venv\Scripts\activate` (Windows) and the API key export before running the app.
+On first run, go to ⚙ Settings → Configure API Access and enter your Anthropic API key. It gets encrypted and stored locally — you won't need to set it again.
+
+Each new terminal session still needs `source .venv/bin/activate` (Mac/Linux) or `.venv\Scripts\activate` (Windows) before running the app.
 
 ## Usage
 
@@ -61,13 +65,18 @@ Each new terminal session needs `source .venv/bin/activate` (Mac/Linux) or `.ven
 | `git rebase -i HEAD~3` | Command analyzer breakdown |
 | Click Cheat Sheets in sidebar | Reference cards |
 | Click Claude Code Tips in sidebar | Tips by category |
+| Click ⚙ in top right | Settings (themes + API keys) |
 
 ## Project structure
 
 ```
 devbrain/
 ├── app.py                  # Flask backend + Claude API + intent detection
+├── config.py               # Credential read/write — only file that touches keys
 ├── requirements.txt
+├── instance/               # Auto-created, never committed
+│   ├── secret.key          # Fernet encryption key
+│   └── config.json         # Encrypted API keys + settings
 ├── cache/
 │   ├── seed.json           # Pre-seeded common commands
 │   └── responses.json      # Auto-created on first use
@@ -79,5 +88,6 @@ devbrain/
 
 Backend: Python + Flask  
 AI: Anthropic Claude API (claude-opus-4-5)  
+Encryption: Python cryptography (Fernet)  
 Frontend: Vanilla HTML, CSS, JavaScript  
 Fonts: JetBrains Mono + DM Sans

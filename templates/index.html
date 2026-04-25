@@ -192,21 +192,132 @@
   /* ── SETTINGS PAGE ── */
   .settings-page {
     padding: 28px;
-    max-width: 600px;
+    max-width: 640px;
   }
 
-  .settings-title {
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 4px;
+  .settings-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
   }
 
-  .settings-sub {
-    font-size: 13px;
-    color: var(--text-muted);
+  .settings-tab {
     font-family: var(--mono);
-    margin-bottom: 28px;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px 18px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+
+  .settings-tab:hover {
+    color: var(--text-dim);
+  }
+
+  .settings-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .settings-panel {
+    display: none;
+  }
+
+  .settings-panel.active {
+    display: block;
+  }
+
+  /* API config form */
+  .api-field {
+    margin-bottom: 20px;
+  }
+
+  .api-field-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .api-saved-badge {
+    font-size: 10px;
+    background: var(--accent-muted);
+    color: var(--accent);
+    padding: 1px 7px;
+    border-radius: 4px;
+  }
+
+  .api-field-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .api-field-input:focus {
+    border-color: var(--accent-muted);
+  }
+
+  .api-field-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    font-family: var(--mono);
+  }
+
+  .api-save-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    padding: 9px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+
+  .api-save-btn:hover {
+    background: var(--accent-dim);
+  }
+
+  .api-save-msg {
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .api-save-msg.success {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid var(--accent-muted);
+    display: block;
+  }
+
+  .api-save-msg.error {
+    background: rgba(252,165,165,0.08);
+    color: var(--red);
+    border: 1px solid rgba(252,165,165,0.2);
+    display: block;
   }
 
   .settings-section-label {
@@ -277,22 +388,22 @@
 
   /* ── GEAR ICON ── */
   .gear-btn {
-    position: fixed;
-    bottom: 20px;
-    left: 14px;
-    width: 32px;
-    height: 32px;
+    position: absolute;
+    right: 20px;
+    top: 100px;
     background: var(--bg3);
     border: 1px solid var(--border2);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 28px;
     color: var(--text-muted);
     transition: all 0.15s;
+    padding: 8px 10px;
     z-index: 10;
+    line-height: 1;
   }
 
   .gear-btn:hover {
@@ -468,6 +579,7 @@
     flex-direction: column;
     overflow: hidden;
     z-index: 1;
+    position: relative;
   }
 
   /* ── SEARCH BAR ── */
@@ -683,6 +795,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 28px;
+    position: relative;
   }
 
   /* ── EMPTY STATE ── */
@@ -1522,9 +1635,6 @@
   </div>
 </aside>
 
-<!-- GEAR BUTTON -->
-<button class="gear-btn" id="gear-btn" onclick="showSettings(this)" title="Settings">⚙</button>
-
 <!-- MAIN -->
 <main class="main">
   <div class="search-area">
@@ -1556,6 +1666,7 @@
       </div>
     </div>
   </div>
+  <button class="gear-btn" id="gear-btn" onclick="showSettings(this)" title="Settings">⚙</button>
 </main>
 
 <!-- CLARIFICATION OVERLAY -->
@@ -1592,7 +1703,7 @@ function selectTool(btn, tool) {
   document.getElementById('gear-btn').classList.remove('active');
   btn.classList.add('active');
   currentTool = tool;
-  document.querySelector('.search-area').style.display = '';
+  document.querySelector('.search-area').style.display = ''; positionGear();
   document.getElementById('content').innerHTML = `
     <div class="empty-state" id="empty-state">
       <div class="empty-terminal">&gt;_</div>
@@ -2161,6 +2272,20 @@ const CHEAT_SHEETS = [
         output: "To gitlab.com:username/repo.git\n * [new branch] feature/my-feature -> feature/my-feature\nCreate a merge request for 'feature/my-feature' on GitLab by visiting:\n  https://gitlab.com/username/repo/-/merge_requests/new?merge_request[source_branch]=feature/my-feature"
       }
     ]
+  },
+  {
+    id: "terminal-find-api-keys",
+    tool: "terminal",
+    platform: null,
+    title: "Terminal — Find API Keys",
+    description: "Hunt down API keys stored in shell config on your Mac",
+    commands: [
+      {
+        cmd: "grep -r \"ANTHROPIC\" ~/.zshrc ~/.zshenv ~/.bash_profile ~/.bashrc 2>/dev/null",
+        desc: "Find Anthropic key in shell config",
+        output: "/Users/you/.zshrc:export ANTHROPIC_API_KEY=sk-ant-..."
+      }
+    ]
   }
 ];
 
@@ -2201,7 +2326,7 @@ function showCheatSheets(btn) {
   document.getElementById('gear-btn').classList.remove('active');
 
   // Hide search bar
-  document.querySelector('.search-area').style.display = 'none';
+  document.querySelector('.search-area').style.display = 'none'; positionGear();
 
   // Render cheat sheets
   const content = document.getElementById('content');
@@ -2235,7 +2360,7 @@ function renderCheatSheetCard(sheet) {
             <div class="cs-command-main">
               <span class="cs-command-text">${c.cmd.startsWith('#') ? `<span style="color:var(--text-muted);font-style:italic">${escapeHtml(c.cmd)}</span>` : colorizeCommand(c.cmd)}</span>
               <span class="cs-command-desc">${escapeHtml(c.desc)}</span>
-              <button class="cs-copy-btn" onclick="event.stopPropagation(); copyCommand(this, '${escapeJs(c.cmd)}')">copy</button>
+              <button class="cs-copy-btn" data-cmd="${escapeHtml(c.cmd)}" onclick="event.stopPropagation(); copyCommand(this, this.dataset.cmd)">copy</button>
             </div>
             <div class="cs-output" id="${sheet.id}-${i}">
               <div class="cs-output-label">Expected output</div>
@@ -2352,7 +2477,7 @@ function showClaudeCodeTips(btn) {
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('gear-btn').classList.remove('active');
-  document.querySelector('.search-area').style.display = 'none';
+  document.querySelector('.search-area').style.display = 'none'; positionGear();
 
   // Group tips by category
   const grouped = {};
@@ -2438,11 +2563,12 @@ function applyTheme(themeId) {
   localStorage.setItem('devbrain-theme', themeId);
 }
 
-function showSettings(btn) {
+function showSettings(btn, activeTab) {
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.search-area').style.display = 'none';
+  document.querySelector('.search-area').style.display = 'none'; positionGear();
   document.getElementById('gear-btn').classList.add('active');
 
+  const tab = activeTab || 'display';
   const savedTheme = localStorage.getItem('devbrain-theme') || 'default';
 
   function swatchHtml(theme) {
@@ -2466,24 +2592,99 @@ function showSettings(btn) {
   content.innerHTML = `
     <div class="settings-page">
       <div class="settings-title">Settings</div>
-      <div class="settings-sub">// preferences and customization</div>
 
-      <div class="settings-section-label">Dark themes</div>
-      <div class="theme-grid" style="margin-bottom: 24px;">
-        ${THEMES.dark.map(swatchHtml).join('')}
+      <div class="settings-tabs">
+        <button class="settings-tab ${tab === 'display' ? 'active' : ''}" onclick="showSettings(null, 'display')">Display</button>
+        <button class="settings-tab ${tab === 'api' ? 'active' : ''}" onclick="showSettings(null, 'api')">Configure API Access</button>
       </div>
 
-      <div class="settings-section-label">Light themes</div>
-      <div class="theme-grid">
-        ${THEMES.light.map(swatchHtml).join('')}
+      <div class="settings-panel ${tab === 'display' ? 'active' : ''}">
+        <div class="settings-section-label">Dark themes</div>
+        <div class="theme-grid" style="margin-bottom: 24px;">
+          ${THEMES.dark.map(swatchHtml).join('')}
+        </div>
+        <div class="settings-section-label">Light themes</div>
+        <div class="theme-grid">
+          ${THEMES.light.map(swatchHtml).join('')}
+        </div>
+      </div>
+
+      <div class="settings-panel ${tab === 'api' ? 'active' : ''}">
+        <div id="api-form">
+          <div style="font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.6;">
+            API keys are encrypted and stored locally. They are never committed to git or sent anywhere except the respective API endpoints.
+          </div>
+          <div class="api-field">
+            <div class="api-field-label">
+              Anthropic API Key
+              <span id="anthropic-badge" style="display:none" class="api-saved-badge">✓ saved</span>
+            </div>
+            <input class="api-field-input" type="password" id="anthropic-key" placeholder="sk-ant-...">
+            <div class="api-field-hint">Leave blank to keep existing saved key. Get yours at console.anthropic.com</div>
+          </div>
+          <div class="api-field">
+            <div class="api-field-label">
+              OpenAI API Key
+              <span id="openai-badge" style="display:none" class="api-saved-badge">✓ saved</span>
+            </div>
+            <input class="api-field-input" type="password" id="openai-key" placeholder="sk-...">
+            <div class="api-field-hint">Leave blank to keep existing saved key. Get yours at platform.openai.com</div>
+          </div>
+          <button class="api-save-btn" onclick="saveApiKeys()">Save keys</button>
+          <div class="api-save-msg" id="api-save-msg"></div>
+        </div>
       </div>
     </div>
   `;
+
+  // Load saved status badges
+  fetch('/api/config').then(r => r.json()).then(cfg => {
+    if (cfg.anthropic_api_key_saved) {
+      document.getElementById('anthropic-badge').style.display = 'inline';
+    }
+    if (cfg.openai_api_key_saved) {
+      document.getElementById('openai-badge').style.display = 'inline';
+    }
+  }).catch(() => {});
+}
+
+async function saveApiKeys() {
+  const anthropicKey = document.getElementById('anthropic-key')?.value || '';
+  const openaiKey = document.getElementById('openai-key')?.value || '';
+  const msg = document.getElementById('api-save-msg');
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        anthropic_api_key: anthropicKey,
+        openai_api_key: openaiKey
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msg.className = 'api-save-msg success';
+      msg.textContent = '✓ Keys saved and encrypted successfully.';
+      // Clear inputs and refresh badges
+      document.getElementById('anthropic-key').value = '';
+      document.getElementById('openai-key').value = '';
+      fetch('/api/config').then(r => r.json()).then(cfg => {
+        if (cfg.anthropic_api_key_saved) document.getElementById('anthropic-badge').style.display = 'inline';
+        if (cfg.openai_api_key_saved) document.getElementById('openai-badge').style.display = 'inline';
+      });
+    } else {
+      msg.className = 'api-save-msg error';
+      msg.textContent = '✗ Error: ' + (data.error || 'Unknown error');
+    }
+  } catch (err) {
+    msg.className = 'api-save-msg error';
+    msg.textContent = '✗ Could not connect to server.';
+  }
 }
 
 function selectTheme(themeId) {
   applyTheme(themeId);
-  // Update active swatch
   document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
   document.getElementById('swatch-' + themeId)?.classList.add('active');
 }
@@ -2492,6 +2693,18 @@ function selectTheme(themeId) {
 // Load saved theme
 const savedTheme = localStorage.getItem('devbrain-theme') || 'default';
 applyTheme(savedTheme);
+
+// Position gear button just inside the checkered content area
+function positionGear() {
+  const searchArea = document.querySelector('.search-area');
+  const gear = document.getElementById('gear-btn');
+  if (searchArea && searchArea.style.display !== 'none') {
+    gear.style.top = (searchArea.offsetHeight + 12) + 'px';
+  } else {
+    gear.style.top = '16px';
+  }
+}
+positionGear();
 // Restore search bar when a tool is selected
 loadWorkflows('all');
 document.getElementById('search-input').focus();

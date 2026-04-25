@@ -1,0 +1,6 @@
+.venv/
+cache/responses.json
+__pycache__/
+*.pyc
+.env
+instance/
