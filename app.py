@@ -145,10 +145,16 @@ For ANALYZE queries (user pasted an actual command), respond with:
   "warning": "optional warning string or null"
 }"""
 
-def query_claude(query, intent):
+def query_claude(query, intent, platform='github'):
     client = anthropic.Anthropic()
     
-    prompt = f"Intent: {intent}\nQuery: {query}"
+    platform_context = ""
+    if platform == 'gitlab':
+        platform_context = "\nPlatform context: The user is using GitLab. Use GitLab terminology (Merge Request instead of Pull Request, GitLab CI/CD instead of GitHub Actions, gitlab.com instead of github.com, etc.) and reference GitLab documentation and conventions in your explanations."
+    else:
+        platform_context = "\nPlatform context: The user is using GitHub. Use GitHub terminology (Pull Request, GitHub Actions, github.com, etc.) and reference GitHub documentation and conventions in your explanations."
+
+    prompt = f"Intent: {intent}\nQuery: {query}{platform_context}"
     
     message = client.messages.create(
         model="claude-opus-4-5",
@@ -170,7 +176,8 @@ def index():
 def handle_query():
     data = request.json
     query = data.get("query", "").strip()
-    intent_override = data.get("intent")  # Set when user picks from ambiguity pop-up
+    intent_override = data.get("intent")
+    platform = data.get("platform", "github")
     
     if not query:
         return jsonify({"error": "No query provided"}), 400
@@ -182,7 +189,7 @@ def handle_query():
         intent = intent_override or detect_intent(query)
     
     tool = detect_tool(query)
-    key = cache_key(f"{intent}:{query}")
+    key = cache_key(f"{intent}:{platform}:{query}")
     
     cache = load_cache()
     
@@ -193,7 +200,7 @@ def handle_query():
     
     # Generate fresh
     try:
-        result = query_claude(query, intent)
+        result = query_claude(query, intent, platform)
         result["from_cache"] = False
         cache[key] = result
         save_cache(cache)

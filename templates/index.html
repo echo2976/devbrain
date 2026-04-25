@@ -1068,6 +1068,41 @@
     border-color: var(--green-muted);
   }
 
+  .platform-toggle {
+    display: flex;
+    margin: 2px 10px 6px 32px;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .platform-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .platform-btn:first-child {
+    border-right: 1px solid var(--border2);
+  }
+
+  .platform-btn:hover {
+    color: var(--text-dim);
+    background: var(--bg3);
+  }
+
+  .platform-btn.active {
+    background: var(--green-muted);
+    color: var(--green);
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -1092,6 +1127,10 @@
     <button class="tool-btn" data-tool="git" onclick="selectTool(this, 'git')">
       <span class="tool-icon">⎇</span> Git
     </button>
+    <div class="platform-toggle" id="platform-toggle">
+      <button class="platform-btn active" id="btn-github" onclick="setPlatform('github')">GitHub</button>
+      <button class="platform-btn" id="btn-gitlab" onclick="setPlatform('gitlab')">GitLab</button>
+    </div>
     <button class="tool-btn" data-tool="docker" onclick="selectTool(this, 'docker')">
       <span class="tool-icon">⬡</span> Docker
     </button>
@@ -1173,6 +1212,19 @@ let currentTool = 'all';
 let pendingQuery = '';
 let queryHistory = [];
 let historyIndex = -1;
+let gitPlatform = 'github';
+
+// ── PLATFORM TOGGLE ──
+function setPlatform(platform) {
+  gitPlatform = platform;
+  document.getElementById('btn-github').classList.toggle('active', platform === 'github');
+  document.getElementById('btn-gitlab').classList.toggle('active', platform === 'gitlab');
+
+  // If cheat sheets are currently showing, re-render them immediately
+  if (document.getElementById('cheatsheet-nav-btn').classList.contains('active')) {
+    showCheatSheets(document.getElementById('cheatsheet-nav-btn'));
+  }
+}
 
 // ── TOOL SELECTION ──
 function selectTool(btn, tool) {
@@ -1290,7 +1342,8 @@ async function submitQuery(intentOverride) {
       body: JSON.stringify({ 
         query,
         intent: intentOverride || null,
-        tool: currentTool !== 'all' ? currentTool : null
+        tool: currentTool !== 'all' ? currentTool : null,
+        platform: gitPlatform
       })
     });
     const data = await res.json();
@@ -1590,6 +1643,7 @@ const CHEAT_SHEETS = [
   {
     id: "git-basics",
     tool: "git",
+    platform: "github",
     title: "Git — Start to Push",
     description: "Full workflow from a new project to code on GitHub",
     commands: [
@@ -1633,6 +1687,7 @@ const CHEAT_SHEETS = [
   {
     id: "git-branch-merge",
     tool: "git",
+    platform: "github",
     title: "Git — Branch & Merge",
     description: "Create a feature branch, make changes, and merge back to main",
     commands: [
@@ -1640,6 +1695,11 @@ const CHEAT_SHEETS = [
         cmd: "git checkout -b feature/my-feature",
         desc: "Create and switch to branch",
         output: "Switched to a new branch 'feature/my-feature'"
+      },
+      {
+        cmd: "# make your changes here",
+        desc: "Edit files in your editor",
+        output: "(no output — open VS Code, edit your files, then save)"
       },
       {
         cmd: "git add .",
@@ -1665,6 +1725,79 @@ const CHEAT_SHEETS = [
         cmd: "git push",
         desc: "Push merged code to GitHub",
         output: "Writing objects: 100% (4/4), 573 bytes | 573.00 KiB/s, done.\nTo github.com:username/repo.git\n   3b9a8ac..32dabab  main -> main"
+      }
+    ]
+  },
+  {
+    id: "gitlab-basics",
+    tool: "git",
+    platform: "gitlab",
+    title: "GitLab — Start to Push",
+    description: "Full workflow from a new project to code on GitLab",
+    commands: [
+      {
+        cmd: "git init",
+        desc: "Initialize a repo",
+        output: "Initialized empty Git repository in /your-project/.git/"
+      },
+      {
+        cmd: "git branch -m main",
+        desc: "Rename branch to main",
+        output: "(no output — prompt updates to show 'main')"
+      },
+      {
+        cmd: "git add .",
+        desc: "Stage all files",
+        output: "(no output — files are staged and ready to commit)"
+      },
+      {
+        cmd: "git commit -m \"Initial commit\"",
+        desc: "Save your first snapshot",
+        output: "[main (root-commit) 3b9a8ac] Initial commit\n 4 files changed, 312 insertions(+)"
+      },
+      {
+        cmd: "git remote add origin git@gitlab.com:username/repo.git",
+        desc: "Connect to GitLab",
+        output: "(no output — remote 'origin' is now set)"
+      },
+      {
+        cmd: "git push -u origin main",
+        desc: "Push to GitLab",
+        output: "Enumerating objects: 6, done.\nWriting objects: 100% (6/6), 1.23 KiB | 1.23 MiB/s, done.\nTo gitlab.com:username/repo.git\n * [new branch]  main -> main"
+      }
+    ]
+  },
+  {
+    id: "gitlab-merge-request",
+    tool: "git",
+    platform: "gitlab",
+    title: "GitLab — Branch & Merge Request",
+    description: "Create a feature branch and open a Merge Request (GitLab's equivalent of a Pull Request)",
+    commands: [
+      {
+        cmd: "git checkout -b feature/my-feature",
+        desc: "Create and switch to branch",
+        output: "Switched to a new branch 'feature/my-feature'"
+      },
+      {
+        cmd: "# make your changes here",
+        desc: "Edit files in your editor",
+        output: "(no output — open VS Code, edit your files, then save)"
+      },
+      {
+        cmd: "git add .",
+        desc: "Stage your changes",
+        output: "(no output — files staged)"
+      },
+      {
+        cmd: "git commit -m \"Describe your change\"",
+        desc: "Commit on the branch",
+        output: "[feature/my-feature 32dabab] Describe your change\n 1 file changed, 18 insertions(+)"
+      },
+      {
+        cmd: "git push -u origin feature/my-feature",
+        desc: "Push branch to GitLab",
+        output: "To gitlab.com:username/repo.git\n * [new branch] feature/my-feature -> feature/my-feature\nCreate a merge request for 'feature/my-feature' on GitLab by visiting:\n  https://gitlab.com/username/repo/-/merge_requests/new?merge_request[source_branch]=feature/my-feature"
       }
     ]
   }
@@ -1717,7 +1850,9 @@ function showCheatSheets(btn) {
         <div style="font-size:13px; color:var(--text-muted); font-family:var(--mono);">Click any command to see expected output</div>
       </div>
       <div class="cheatsheets-grid">
-        ${CHEAT_SHEETS.map(sheet => renderCheatSheetCard(sheet)).join('')}
+        ${CHEAT_SHEETS
+          .filter(sheet => !sheet.platform || sheet.platform === gitPlatform)
+          .map(sheet => renderCheatSheetCard(sheet)).join('')}
       </div>
     </div>
   `;
@@ -1736,7 +1871,7 @@ function renderCheatSheetCard(sheet) {
         ${sheet.commands.map((c, i) => `
           <div class="cs-command-row" onclick="toggleCsOutput('${sheet.id}-${i}')">
             <div class="cs-command-main">
-              <span class="cs-command-text">${colorizeCommand(c.cmd)}</span>
+              <span class="cs-command-text">${c.cmd.startsWith('#') ? `<span style="color:var(--text-muted);font-style:italic">${escapeHtml(c.cmd)}</span>` : colorizeCommand(c.cmd)}</span>
               <span class="cs-command-desc">${escapeHtml(c.desc)}</span>
               <button class="cs-copy-btn" onclick="event.stopPropagation(); copyCommand(this, '${escapeJs(c.cmd)}')">copy</button>
             </div>
