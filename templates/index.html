@@ -297,6 +297,61 @@
     background: var(--accent-dim);
   }
 
+  .api-test-btn {
+    background: #c2620a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 4px;
+    margin-left: 8px;
+  }
+
+  .api-test-btn:hover {
+    filter: brightness(1.1);
+  }
+
+  .api-test-btn.success {
+    background: #16a34a;
+  }
+
+  .api-test-btn.error {
+    background: #dc2626;
+  }
+
+  .api-test-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .api-test-msg {
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .api-test-msg.success {
+    background: rgba(22,163,74,0.1);
+    color: #16a34a;
+    border: 1px solid rgba(22,163,74,0.3);
+    display: block;
+  }
+
+  .api-test-msg.error {
+    background: rgba(252,165,165,0.08);
+    color: var(--red);
+    border: 1px solid rgba(252,165,165,0.2);
+    display: block;
+  }
+
   .api-save-msg {
     font-family: var(--mono);
     font-size: 11px;
@@ -318,6 +373,81 @@
     color: var(--red);
     border: 1px solid rgba(252,165,165,0.2);
     display: block;
+  }
+
+  .token-layout {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    align-items: stretch;
+  }
+
+  .token-stats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .token-cost-box {
+    width: 160px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 14px;
+    font-family: var(--mono);
+  }
+
+  .token-cost-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    align-self: center;
+  }
+
+  .token-cost-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .token-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .token-stat-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .token-stat-value {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .token-since {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
   }
 
   .settings-section-label {
@@ -2596,6 +2726,7 @@ function showSettings(btn, activeTab) {
       <div class="settings-tabs">
         <button class="settings-tab ${tab === 'display' ? 'active' : ''}" onclick="showSettings(null, 'display')">Display</button>
         <button class="settings-tab ${tab === 'api' ? 'active' : ''}" onclick="showSettings(null, 'api')">Configure API Access</button>
+        <button class="settings-tab ${tab === 'tokens' ? 'active' : ''}" onclick="showSettings(null, 'tokens')">Token Usage</button>
       </div>
 
       <div class="settings-panel ${tab === 'display' ? 'active' : ''}">
@@ -2606,6 +2737,57 @@ function showSettings(btn, activeTab) {
         <div class="settings-section-label">Light themes</div>
         <div class="theme-grid">
           ${THEMES.light.map(swatchHtml).join('')}
+        </div>
+      </div>
+
+      <div class="settings-panel ${tab === 'tokens' ? 'active' : ''}">
+        <div id="token-usage-panel">
+          <div class="token-since" id="token-since">Loading...</div>
+          <div class="settings-section-label">Anthropic API</div>
+          <div class="settings-section-label" style="color: white;">All Time</div>
+          <div class="token-layout">
+            <div class="token-stats">
+              <div class="token-stat-row">
+                <span class="token-stat-label">Input tokens</span>
+                <span class="token-stat-value" id="stat-input">—</span>
+              </div>
+              <div class="token-stat-row">
+                <span class="token-stat-label">Output tokens</span>
+                <span class="token-stat-value" id="stat-output">—</span>
+              </div>
+              <div class="token-stat-row">
+                <span class="token-stat-label">Total tokens</span>
+                <span class="token-stat-value" id="stat-total">—</span>
+              </div>
+            </div>
+            <div class="token-cost-box">
+              <span class="token-cost-title">Estimated Cost</span>
+              <span class="token-cost-value" id="stat-cost">—</span>
+            </div>
+          </div>
+
+          <div class="settings-section-label" style="margin-top:24px; color: white;">This Session</div>
+          <div class="token-layout">
+            <div class="token-stats">
+              <div class="token-stat-row">
+                <span class="token-stat-label">Input tokens</span>
+                <span class="token-stat-value" id="sess-input">—</span>
+              </div>
+              <div class="token-stat-row">
+                <span class="token-stat-label">Output tokens</span>
+                <span class="token-stat-value" id="sess-output">—</span>
+              </div>
+              <div class="token-stat-row">
+                <span class="token-stat-label">Total tokens</span>
+                <span class="token-stat-value" id="sess-total">—</span>
+              </div>
+            </div>
+            <div class="token-cost-box">
+              <span class="token-cost-title">Estimated Cost</span>
+              <span class="token-cost-value" id="sess-cost">—</span>
+            </div>
+          </div>
+          <div class="token-since" style="margin-top:12px; margin-bottom:0;">claude-sonnet-4-6 &nbsp;·&nbsp; $3.00 / 1M input &nbsp;·&nbsp; $15.00 / 1M output</div>
         </div>
       </div>
 
@@ -2631,13 +2813,15 @@ function showSettings(btn, activeTab) {
             <div class="api-field-hint">Leave blank to keep existing saved key. Get yours at platform.openai.com</div>
           </div>
           <button class="api-save-btn" onclick="saveApiKeys()">Save keys</button>
+          <button class="api-test-btn" id="api-test-btn" onclick="testApiKeys()">Test Keys</button>
+          <div class="api-test-msg" id="api-test-msg"></div>
           <div class="api-save-msg" id="api-save-msg"></div>
         </div>
       </div>
     </div>
   `;
 
-  // Load saved status badges
+  // Load saved status badges and token usage
   fetch('/api/config').then(r => r.json()).then(cfg => {
     if (cfg.anthropic_api_key_saved) {
       document.getElementById('anthropic-badge').style.display = 'inline';
@@ -2645,6 +2829,35 @@ function showSettings(btn, activeTab) {
     if (cfg.openai_api_key_saved) {
       document.getElementById('openai-badge').style.display = 'inline';
     }
+    const fmt = n => (n || 0).toLocaleString();
+    const sinceEl = document.getElementById('token-since');
+    if (sinceEl) {
+      const since = cfg.tokens_tracking_since
+        ? 'Since ' + new Date(cfg.tokens_tracking_since).toLocaleDateString(undefined, {year:'numeric',month:'short',day:'numeric'})
+        : 'No usage recorded yet.';
+      sinceEl.textContent = since;
+    }
+    const calcCost = (i, o) => '$' + ((i / 1_000_000 * 3.00) + (o / 1_000_000 * 15.00)).toFixed(4);
+    const input = cfg.tokens_input_total || 0;
+    const output = cfg.tokens_output_total || 0;
+    const sessIn = cfg.session_tokens_input || 0;
+    const sessOut = cfg.session_tokens_output || 0;
+    const statInput = document.getElementById('stat-input');
+    const statOutput = document.getElementById('stat-output');
+    const statTotal = document.getElementById('stat-total');
+    const statCost = document.getElementById('stat-cost');
+    if (statInput) statInput.textContent = fmt(input);
+    if (statOutput) statOutput.textContent = fmt(output);
+    if (statTotal) statTotal.textContent = fmt(input + output);
+    if (statCost) statCost.textContent = calcCost(input, output);
+    const sessInput = document.getElementById('sess-input');
+    const sessOutput = document.getElementById('sess-output');
+    const sessTotal = document.getElementById('sess-total');
+    const sessCost = document.getElementById('sess-cost');
+    if (sessInput) sessInput.textContent = fmt(sessIn);
+    if (sessOutput) sessOutput.textContent = fmt(sessOut);
+    if (sessTotal) sessTotal.textContent = fmt(sessIn + sessOut);
+    if (sessCost) sessCost.textContent = calcCost(sessIn, sessOut);
   }).catch(() => {});
 }
 
@@ -2681,6 +2894,33 @@ async function saveApiKeys() {
     msg.className = 'api-save-msg error';
     msg.textContent = '✗ Could not connect to server.';
   }
+}
+
+async function testApiKeys() {
+  const btn = document.getElementById('api-test-btn');
+  const msg = document.getElementById('api-test-msg');
+  btn.disabled = true;
+  btn.className = 'api-test-btn';
+  msg.className = 'api-test-msg';
+  msg.textContent = '';
+  try {
+    const res = await fetch('/api/test-keys', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      btn.className = 'api-test-btn success';
+      msg.className = 'api-test-msg success';
+      msg.textContent = '✓ ' + data.message;
+    } else {
+      btn.className = 'api-test-btn error';
+      msg.className = 'api-test-msg error';
+      msg.textContent = '✗ ' + (data.error || 'Key test failed.');
+    }
+  } catch (err) {
+    btn.className = 'api-test-btn error';
+    msg.className = 'api-test-msg error';
+    msg.textContent = '✗ Could not connect to server.';
+  }
+  btn.disabled = false;
 }
 
 function selectTheme(themeId) {

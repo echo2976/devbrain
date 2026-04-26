@@ -15,6 +15,7 @@ Two-tier read API:
 import json
 import os
 import stat
+from datetime import datetime
 from pathlib import Path
 from cryptography.fernet import Fernet
 
@@ -51,6 +52,9 @@ def _decrypt(token: str) -> str:
 DEFAULT_CONFIG = {
     "anthropic_api_key": "",       # encrypted
     "openai_api_key": "",          # encrypted
+    "tokens_input_total": 0,
+    "tokens_output_total": 0,
+    "tokens_tracking_since": "",
 }
 
 def _read_raw() -> dict:
@@ -116,10 +120,21 @@ def save_credentials(updates: dict):
     raw = _read_raw()
     for key, value in updates.items():
         if key in SENSITIVE_FIELDS:
-            # Only overwrite if a non-empty value was passed
             if value and value.strip():
                 raw[key] = _encrypt(value.strip())
-            # else: preserve existing encrypted value
+                if key == "anthropic_api_key":
+                    raw["tokens_input_total"] = 0
+                    raw["tokens_output_total"] = 0
+                    raw["tokens_tracking_since"] = datetime.now().isoformat()
         else:
             raw[key] = value
+    _write_raw(raw)
+
+
+def add_token_usage(input_tokens: int, output_tokens: int):
+    raw = _read_raw()
+    raw["tokens_input_total"] = raw.get("tokens_input_total", 0) + input_tokens
+    raw["tokens_output_total"] = raw.get("tokens_output_total", 0) + output_tokens
+    if not raw.get("tokens_tracking_since"):
+        raw["tokens_tracking_since"] = datetime.now().isoformat()
     _write_raw(raw)

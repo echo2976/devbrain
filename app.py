@@ -5,9 +5,13 @@ import os
 import hashlib
 import re
 from pathlib import Path
-from config import load_config, get_api_credentials, save_credentials
+from config import load_config, get_api_credentials, save_credentials, add_token_usage
 
 app = Flask(__name__)
+
+# Session token counters — reset on server restart
+session_tokens_input = 0
+session_tokens_output = 0
 
 # Paths
 CACHE_FILE = Path(__file__).parent / "cache" / "responses.json"
@@ -162,12 +166,16 @@ def query_claude(query, intent, platform='github'):
     prompt = f"Intent: {intent}\nQuery: {query}{platform_context}"
     
     message = client.messages.create(
-        model="claude-opus-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=2000,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}]
     )
     
+    global session_tokens_input, session_tokens_output
+    add_token_usage(message.usage.input_tokens, message.usage.output_tokens)
+    session_tokens_input += message.usage.input_tokens
+    session_tokens_output += message.usage.output_tokens
     raw = message.content[0].text.strip()
     raw = re.sub(r'^```json\s*', '', raw)
     raw = re.sub(r'\s*```$', '', raw)
@@ -277,10 +285,33 @@ def get_workflows():
     }
     return jsonify(workflows)
 
+@app.route("/api/test-keys", methods=["POST"])
+def test_keys():
+    """Test whether the saved Anthropic API key is valid."""
+    creds = get_api_credentials()
+    api_key = creds.get("anthropic_api_key") or os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return jsonify({"success": False, "error": "No Anthropic API key saved. Add one above and save first."})
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1,
+            messages=[{"role": "user", "content": "hi"}]
+        )
+        return jsonify({"success": True, "message": "Anthropic API key is valid."})
+    except anthropic.AuthenticationError:
+        return jsonify({"success": False, "error": "Invalid API key — authentication failed."})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 @app.route("/api/config", methods=["GET"])
 def get_config():
     """Return config with boolean flags for saved secrets — never actual values."""
-    return jsonify(load_config())
+    cfg = load_config()
+    cfg["session_tokens_input"] = session_tokens_input
+    cfg["session_tokens_output"] = session_tokens_output
+    return jsonify(cfg)
 
 @app.route("/api/config", methods=["POST"])
 def update_config():
