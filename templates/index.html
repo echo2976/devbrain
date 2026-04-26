@@ -928,6 +928,134 @@
   }
 
   /* ── CLARIFICATION POP-UP ── */
+  /* ── WELCOME OVERLAY ── */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .welcome-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .welcome-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 32px 36px;
+    width: 520px;
+    max-width: 90vw;
+    transform: translateY(12px);
+    transition: transform 0.25s;
+  }
+
+  .welcome-overlay.visible .welcome-box {
+    transform: translateY(0);
+  }
+
+  .welcome-logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .welcome-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .welcome-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-bottom: 24px;
+  }
+
+  .welcome-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .welcome-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .welcome-feature-icon {
+    font-size: 16px;
+    line-height: 1;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .welcome-feature-text strong {
+    display: block;
+    font-size: 13px;
+    color: #ffffff;
+    margin-bottom: 2px;
+  }
+
+  .welcome-feature-text span {
+    font-size: 11px;
+    color: rgba(255,255,255,0.75);
+    font-family: var(--mono);
+    line-height: 1.4;
+  }
+
+  .welcome-creds-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: rgba(251,146,60,0.1);
+    border: 1px solid rgba(251,146,60,0.3);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #fb923c;
+  }
+
+  .welcome-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .welcome-btn:hover {
+    background: var(--accent-dim);
+  }
+
   .clarify-overlay {
     position: fixed;
     inset: 0;
@@ -1896,6 +2024,45 @@
   </div>
   <button class="gear-btn" id="gear-btn" onclick="showSettings(this)" title="Settings">⚙</button>
 </main>
+
+<!-- WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-box">
+    <div class="welcome-logo">DevBrain</div>
+    <div class="welcome-title">Your dev tools assistant</div>
+    <div class="welcome-sub">Ask questions, learn commands, build faster.</div>
+
+    <div class="welcome-features">
+      <div class="welcome-feature">
+        <div class="welcome-feature-icon">›_</div>
+        <div class="welcome-feature-text">
+          <strong>Ask anything</strong>
+          <span>Type a question or paste a command — get a plain-English breakdown with real examples.</span>
+        </div>
+      </div>
+      <div class="welcome-feature">
+        <div class="welcome-feature-icon">≡</div>
+        <div class="welcome-feature-text">
+          <strong>Cheat Sheets &amp; Workflows</strong>
+          <span>Quick-reference commands and step-by-step guides for git, docker, python, and more.</span>
+        </div>
+      </div>
+      <div class="welcome-feature">
+        <div class="welcome-feature-icon">◈</div>
+        <div class="welcome-feature-text">
+          <strong>AI News</strong>
+          <span>Curated feed from Simon Willison, Hacker News, and Karpathy — updated hourly.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-creds-banner" id="welcome-creds-banner" style="display:none;">
+      ⚠ No API key configured — go to Settings → Configure API Access to get started.
+    </div>
+
+    <button class="welcome-btn" onclick="dismissWelcome()">Get Started</button>
+  </div>
+</div>
 
 <!-- CLARIFICATION OVERLAY -->
 <div class="clarify-overlay" id="clarify-overlay">
@@ -3079,6 +3246,22 @@ function selectTheme(themeId) {
   document.getElementById('swatch-' + themeId)?.classList.add('active');
 }
 
+// ── WELCOME ──
+function dismissWelcome() {
+  localStorage.setItem('devbrain-welcomed', '1');
+  document.getElementById('welcome-overlay').classList.remove('visible');
+}
+
+function maybeShowWelcome() {
+  if (localStorage.getItem('devbrain-welcomed')) return;
+  document.getElementById('welcome-overlay').classList.add('visible');
+  fetch('/api/config').then(r => r.json()).then(cfg => {
+    if (!cfg.anthropic_api_key_saved) {
+      document.getElementById('welcome-creds-banner').style.display = 'flex';
+    }
+  }).catch(() => {});
+}
+
 // ── INIT ──
 // Load saved theme
 const savedTheme = localStorage.getItem('devbrain-theme') || 'default';
@@ -3098,6 +3281,7 @@ positionGear();
 // Restore search bar when a tool is selected
 loadWorkflows('all');
 document.getElementById('search-input').focus();
+maybeShowWelcome();
 </script>
 </body>
 </html>
