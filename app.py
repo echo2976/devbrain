@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify, render_template
 import anthropic
+import calendar
+import feedparser
 import json
 import os
 import hashlib
 import re
+import time
 from pathlib import Path
 from config import load_config, get_api_credentials, save_credentials, add_token_usage
 
@@ -322,6 +325,61 @@ def update_config():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# ── News Feed ──
+NEWS_FEEDS = [
+    {"id": "hn-anthropic",  "name": "HN · Anthropic",  "url": "https://hnrss.org/newest?q=Anthropic&points=10",         "color": "#fb923c"},
+    {"id": "simonwillison", "name": "Simon Willison",   "url": "https://simonwillison.net/atom/everything/",             "color": "#60a5fa"},
+    {"id": "hn-claudecode", "name": "HN · Claude Code", "url": "https://hnrss.org/newest?q=Claude+Code&points=5",       "color": "#f472b6"},
+    {"id": "karpathy",      "name": "Karpathy",         "url": "https://karpathy.github.io/feed.xml",                   "color": "#34d399", "cutoff_days": 180},
+]
+NEWS_CACHE_TTL = 3600  # 60 minutes
+_news_cache = {"items": [], "fetched_at": 0}
+
+def _strip_html(text):
+    return re.sub(r'<[^>]+>', '', text or '').strip()
+
+def _fetch_news():
+    global _news_cache
+    now = time.time()
+    if _news_cache["items"] and (now - _news_cache["fetched_at"]) < NEWS_CACHE_TTL:
+        return _news_cache["items"]
+    items = []
+    for feed_def in NEWS_FEEDS:
+        try:
+            cutoff = now - feed_def.get("cutoff_days", 30) * 24 * 3600
+            feed = feedparser.parse(feed_def["url"])
+            for entry in feed.entries:
+                published = entry.get("published_parsed") or entry.get("updated_parsed")
+                ts = calendar.timegm(published) if published else now
+                if ts < cutoff:
+                    continue
+                excerpt = _strip_html(entry.get("summary", ""))[:200]
+                items.append({
+                    "source":    feed_def["name"],
+                    "source_id": feed_def["id"],
+                    "color":     feed_def["color"],
+                    "title":     _strip_html(entry.get("title", "")),
+                    "url":       entry.get("link", ""),
+                    "excerpt":   excerpt,
+                    "date":      ts,
+                })
+        except Exception:
+            pass
+    if items:
+        seen = set()
+        deduped = []
+        for item in items:
+            if item["url"] not in seen:
+                seen.add(item["url"])
+                deduped.append(item)
+        deduped.sort(key=lambda x: x["date"], reverse=True)
+        _news_cache = {"items": deduped[:20], "fetched_at": now}
+    return _news_cache["items"]
+
+@app.route("/api/news", methods=["GET"])
+def get_news():
+    return jsonify(_fetch_news())
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

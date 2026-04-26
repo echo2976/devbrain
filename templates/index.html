@@ -189,6 +189,101 @@
     --syn-arg: #b45309;
   }
 
+  /* ── NEWS FEED ── */
+  .news-page {
+    padding: 28px;
+    max-width: 720px;
+  }
+
+  .news-page-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .news-page-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-bottom: 24px;
+  }
+
+  .news-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .news-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .news-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .news-source-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  .news-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .news-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    text-decoration: none;
+    line-height: 1.4;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .news-title:hover {
+    color: var(--accent);
+  }
+
+  .news-excerpt {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    font-family: var(--mono);
+  }
+
+  .news-loading {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .news-empty {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 40px 0;
+    text-align: center;
+  }
+
   /* ── SETTINGS PAGE ── */
   .settings-page {
     padding: 28px;
@@ -1755,6 +1850,9 @@
     <button class="tool-btn" id="claudecode-nav-btn" onclick="showClaudeCodeTips(this)">
       <span class="tool-icon">✦</span> Claude Code Tips
     </button>
+    <button class="tool-btn" id="news-nav-btn" onclick="showNews(this)">
+      <span class="tool-icon">◈</span> AI News
+    </button>
   </div>
 
   <div class="sidebar-divider"></div>
@@ -2449,6 +2547,58 @@ function colorizeCommand(cmd) {
 }
 
 // ── CHEAT SHEETS DISPLAY ──
+function showNews(btn) {
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('gear-btn').classList.remove('active');
+  document.querySelector('.search-area').style.display = 'none'; positionGear();
+
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="news-page">
+      <div class="news-page-title">AI News</div>
+      <div class="news-page-sub">Simon Willison · HN Anthropic · HN Claude Code — updated hourly</div>
+      <div class="news-feed" id="news-feed">
+        <div class="news-loading">Loading feed...</div>
+      </div>
+    </div>
+  `;
+
+  fetch('/api/news')
+    .then(r => r.json())
+    .then(items => {
+      const feed = document.getElementById('news-feed');
+      if (!feed) return;
+      if (!items.length) {
+        feed.innerHTML = '<div class="news-empty">No recent items found.</div>';
+        return;
+      }
+      feed.innerHTML = items.map(item => {
+        const date = new Date(item.date * 1000);
+        const now = Date.now();
+        const diffDays = Math.floor((now - date) / 86400000);
+        const dateStr = diffDays === 0 ? 'Today'
+          : diffDays === 1 ? 'Yesterday'
+          : diffDays < 7 ? diffDays + 'd ago'
+          : date.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+        return `
+          <div class="news-card">
+            <div class="news-card-header">
+              <span class="news-source-badge" style="color:${item.color}; border: 1px solid ${item.color}40;">${item.source}</span>
+              <span class="news-date">${dateStr}</span>
+            </div>
+            <a class="news-title" href="${item.url}" target="_blank" rel="noopener">${item.title}</a>
+            ${item.excerpt ? `<div class="news-excerpt">${item.excerpt}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    })
+    .catch(() => {
+      const feed = document.getElementById('news-feed');
+      if (feed) feed.innerHTML = '<div class="news-empty">Could not load feed. Check your connection.</div>';
+    });
+}
+
 function showCheatSheets(btn) {
   // Update sidebar active state
   document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
